@@ -94,6 +94,8 @@ func (c *Configuration) readFile(name string) error {
 	if err != nil {
 		return fmt.Errorf("failed to read file %s: %v", name, err)
 	}
+	defer f.Close()
+
 	fileScanner := bufio.NewScanner(f)
 	var currentSectionName string
 	for fileScanner.Scan() {
