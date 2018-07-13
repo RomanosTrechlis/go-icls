@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -56,7 +57,7 @@ func GetConfigurationFromDir(path string) (*Configuration, error) {
 	fss = filterPropertiesFiles(fss...)
 
 	for _, fs := range fss {
-		c.readFile(path + fs.Name())
+		c.readFile(filepath.Join(path, fs.Name()))
 		if err != nil {
 			return nil, fmt.Errorf("failed to read file %s: %v", path+fs.Name(), err)
 		}
