@@ -1,18 +1,11 @@
 package parse
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 )
 
-// Command holds the actual name of command
-// the several flags that might exist.
-type Command struct {
-	Command string
-	Flags   map[string]string
-}
-
-// Parse parses the command given and return a Command struct
+// Parse parses the command given and return the command and the flags
 //
 // Example commands:
 //
@@ -28,29 +21,25 @@ type Command struct {
 // command with flag value in quotation marks
 // add -d dir -f filename -e -m "This is one"
 //
-func Parse(cmd string) (*Command, error) {
+func Parse(cmd string) (string, map[string]string, error) {
 	cmdName, err := getCommand(cmd)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	command := &Command{
-		Command: cmdName,
-		Flags: make(map[string]string),
-	}
-
-	err = command.getFlags(cmd)
-	return command, nil
+	flags := getFlags(cmd)
+	return cmdName, flags, nil
 }
 
-func (c *Command) getFlags(cmd string) error {
+func getFlags(cmd string) map[string]string {
 	f := strings.Split(cmd, " -")
+	flags := make(map[string]string)
 	for i := 1; i < len(f); i++ {
 		flag := f[i]
 		k, v := getKeyValue(flag)
-		c.Flags[k] = v
+		flags[k] = v
 	}
-	return nil
+	return flags
 }
 
 func getKeyValue(s string) (string, string) {

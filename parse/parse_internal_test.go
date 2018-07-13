@@ -14,15 +14,13 @@ func TestGetFlags(t *testing.T) {
 	}
 
 	for _, tt := range test {
-		c := new(Command)
-		c.Flags = make(map[string]string)
-		c.getFlags(tt.cmd)
-		if len(c.Flags) != tt.numOfFlags {
-			t.Errorf("expected %d number of flags, instead got %d", tt.numOfFlags, len(c.Flags))
+		flags := getFlags(tt.cmd)
+		if len(flags) != tt.numOfFlags {
+			t.Errorf("expected %d number of flags, instead got %d", tt.numOfFlags, len(flags))
 		}
 
 		count := 0
-		for _, v := range c.Flags {
+		for _, v := range flags {
 			if v == "" {
 				continue
 			}

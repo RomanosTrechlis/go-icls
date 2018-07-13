@@ -1,33 +1,34 @@
-package parse
+package parse_test
 
 import (
+	"github.com/RomanosTrechlis/go-icls/parse"
 	"testing"
 )
 
 func TestParse(t *testing.T) {
 	var test = []struct {
 		cmd                 string
-		cmdName				string
+		cmdName             string
 		numOfFlags          int
 		numOfNonEmptyValues int
 	}{
 		{"get -d dir -f filename", "get", 2, 2},
 		{"del -d dir -f filename -e", "del", 3, 2},
-		{"rem -d dir -f filename -e -m This is one", "rem",4, 3},
-		{"add -d dir -f filename -e -m \"This is one\"", "add",4, 3},
+		{"rem -d dir -f filename -e -m This is one", "rem", 4, 3},
+		{"add -d dir -f filename -e -m \"This is one\"", "add", 4, 3},
 	}
 
 	for _, tt := range test {
-		c, _ := Parse(tt.cmd)
-		if c.Command != tt.cmdName {
-			t.Errorf("expected command name to be '%s', instead got '%s'", tt.cmdName, c.Command)
+		cmdName, flags, _ := parse.Parse(tt.cmd)
+		if cmdName != tt.cmdName {
+			t.Errorf("expected command name to be '%s', instead got '%s'", tt.cmdName, cmdName)
 		}
-		if len(c.Flags) != tt.numOfFlags {
-			t.Errorf("expected %d number of flags, instead got %d", tt.numOfFlags, len(c.Flags))
+		if len(flags) != tt.numOfFlags {
+			t.Errorf("expected %d number of flags, instead got %d", tt.numOfFlags, len(flags))
 		}
 
 		count := 0
-		for _, v := range c.Flags {
+		for _, v := range flags {
 			if v == "" {
 				continue
 			}

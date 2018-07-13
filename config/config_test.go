@@ -27,7 +27,7 @@ func TestGetConfigurationFromSingleFile(t *testing.T) {
 
 	_, err = config.GetConfigurationFromSingleFile(testPath + "nonexistentfile.properties")
 	if err == nil {
-		t.Fatalf("expected to fail with error, but didn't: %s", testPath + "nonexistentfile.properties")
+		t.Fatalf("expected to fail with error, but didn't: %s", testPath+"nonexistentfile.properties")
 	}
 }
 

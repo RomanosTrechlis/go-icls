@@ -58,7 +58,7 @@ func GetConfigurationFromDir(path string) (*Configuration, error) {
 	for _, fs := range fss {
 		c.readFile(path + fs.Name())
 		if err != nil {
-			return nil, fmt.Errorf("failed to read file %s: %v", path + fs.Name(), err)
+			return nil, fmt.Errorf("failed to read file %s: %v", path+fs.Name(), err)
 		}
 	}
 	return c, err
