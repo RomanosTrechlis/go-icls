@@ -1,14 +1,6 @@
 // Package config reads from a specific local directory
 // all files ending in '.properties' and creates a map
 // containing the configuration.
-//
-// Example .properties file:
-//
-// # lines starting with hashtag are being ignored
-// [General]
-// filename = config.json
-// configPath = ./test
-//
 package config
 
 import (
@@ -21,38 +13,79 @@ import (
 
 type Section map[string]string
 
+// Configuration contains a map of sections with
+// the corresponding key-value pairs
+//
+// Example of .properties file:
+//
+// # lines starting with hashtag are being ignored
+// [General]
+// filename = test.file
+// path = newpath
+// key=value.new
+//
+// [Work]
+// hours = 8
+// salary=1000
+// key=value
+//
 type Configuration struct {
+	// C contains a map with keys the section and
+	// values the key-value pairs per section
 	C map[string]map[string]string
 }
 
-func GetConfiguration(path string) (*Configuration, error) {
+// GetConfigurationFromDir returns the Configuration struct
+// with all key-value pairs found inside the .properties
+// files of a directory, by section.
+func GetConfigurationFromDir(path string) (*Configuration, error) {
 	_, err := os.Stat(path)
 	if err != nil {
 		createConfigPath(path)
 		return nil, fmt.Errorf("config file doesn't exist")
 	}
+
 	c := &Configuration{
 		C: make(map[string]map[string]string, 0),
 	}
-	err = c.readConfigFiles(path)
+
+	fss, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read directory %s: %v", path, err)
+	}
+	fss = filterPropertiesFiles(fss...)
+
+	for _, fs := range fss {
+		c.readFile(path + fs.Name())
+		if err != nil {
+			return nil, fmt.Errorf("failed to read file %s: %v", path + fs.Name(), err)
+		}
+	}
 	return c, err
+}
+
+// GetConfigurationFromSingleFile returns the Configuration struct with
+// all key-value pairs found inside the specific .properties file, by section.
+func GetConfigurationFromSingleFile(filename string) (*Configuration, error) {
+	c := &Configuration{
+		C: make(map[string]map[string]string, 0),
+	}
+	fs, err := os.Stat(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read fileinfo for %s: %v", filename, err)
+	}
+	fss := filterPropertiesFiles(fs)
+	for _, _ = range fss {
+		err = c.readFile(filename)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read file %s: %v", filename, err)
+		}
+	}
+	return c, nil
 }
 
 func createConfigPath(path string) {
 	os.Mkdir(path, 667)
-}
-
-func (c *Configuration) readConfigFiles(path string) error {
-	fss, err := ioutil.ReadDir(path)
-	if err != nil {
-		return fmt.Errorf("failed to read directory %s: %v", path, err)
-	}
-	fss = filterPropertiesFiles(fss)
-
-	for _, fs := range fss {
-		c.readFile(path + fs.Name())
-	}
-	return nil
 }
 
 func (c *Configuration) readFile(name string) error {
@@ -64,7 +97,8 @@ func (c *Configuration) readFile(name string) error {
 	var currentSectionName string
 	for fileScanner.Scan() {
 		line := fileScanner.Text()
-		if strings.Trim(line, " ") == "" {
+		line = strings.Trim(line, " ")
+		if line == "" {
 			continue
 		}
 		if strings.HasPrefix(line, "#") {
@@ -98,7 +132,7 @@ func getSectionName(line string) string {
 	return s
 }
 
-func filterPropertiesFiles(fss []os.FileInfo) []os.FileInfo {
+func filterPropertiesFiles(fss ...os.FileInfo) []os.FileInfo {
 	filtered := make([]os.FileInfo, 0)
 	for _, fs := range fss {
 		if strings.HasSuffix(fs.Name(), ".properties") {

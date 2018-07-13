@@ -1,3 +1,5 @@
 .idea
 
 go-icls.iml
+
+**/*.exe
