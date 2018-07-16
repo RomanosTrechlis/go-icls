@@ -108,19 +108,23 @@ func (c *Configuration) readFile(name string) error {
 			continue
 		}
 		if strings.HasPrefix(line, "[") {
-			sectionName := getSectionName(line)
-			currentSectionName = sectionName
-			if _, ok := c.C[sectionName]; ok {
-				continue
-			}
-			section := make(map[string]string, 0)
-			c.C[sectionName] = section
+			currentSectionName = c.processSection(line)
 			continue
 		}
 		kv := strings.Split(line, "=")
 		c.setNewProperty(currentSectionName, strings.Trim(kv[0], " "), strings.Trim(kv[1], " "))
 	}
 	return nil
+}
+
+func (c *Configuration) processSection(line string) string {
+	sectionName := getSectionName(line)
+	if _, ok := c.C[sectionName]; ok {
+		return sectionName
+	}
+	section := make(map[string]string, 0)
+	c.C[sectionName] = section
+	return sectionName
 }
 
 func (c *Configuration) setNewProperty(section, key, value string) {
