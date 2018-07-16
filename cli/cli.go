@@ -41,20 +41,33 @@ func (cli *CLI) Run(f func(c Command)) {
 	go func() {
 		fmt.Fprintf(os.Stdout, "> ")
 		for scanner.Scan() {
-			cmd, err := cli.parse(scanner.Text())
+			exit, err := cli.RunCommand(scanner.Text(), f)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Command '%s' coudn't be parse: %v", err)
+				fmt.Fprintf(os.Stderr, "command '%s' coudn't be parse: %v", err)
 				continue
 			}
-			if cmd.Command == "quit" {
+			if exit {
 				cli.quit()
 				return
 			}
-			f(*cmd)
 			fmt.Fprintf(os.Stdout, "> ")
 		}
 	}()
 	<-cli.closeChan
+}
+
+// RunCommand parses a string and applies the f function. Returns true for exiting.
+func (cli *CLI) RunCommand(textCmd string, f func(c Command)) (bool, error) {
+	cmd, err := cli.parse(textCmd)
+	if err != nil {
+		return false, err
+	}
+	if cmd.Command == "quit" {
+		cli.quit()
+		return true, nil
+	}
+	f(*cmd)
+	return false, nil
 }
 
 func (cli *CLI) parse(cmd string) (*Command, error) {
