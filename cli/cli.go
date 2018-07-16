@@ -63,7 +63,6 @@ func (cli *CLI) RunCommand(textCmd string, f func(c Command)) (bool, error) {
 		return false, err
 	}
 	if cmd.Command == "quit" {
-		cli.quit()
 		return true, nil
 	}
 	f(*cmd)
