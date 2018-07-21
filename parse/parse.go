@@ -35,6 +35,10 @@ func getFlags(cmd string) map[string]string {
 	f := strings.Split(cmd, " -")
 	flags := make(map[string]string)
 	for i := 1; i < len(f); i++ {
+		// this is the case that a command is passed with '--' as prefix
+		if strings.HasPrefix(f[i], "-") {
+			f[i] = strings.Replace(f[i], "-", "", 1)
+		}
 		flag := f[i]
 		k, v := getKeyValue(flag)
 		flags[k] = v
