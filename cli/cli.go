@@ -49,10 +49,7 @@ func (cli *CLI) Run() {
 
 // Execute parses a string and applies the f function. Returns true for exiting.
 func (cli *CLI) Execute(textCmd string) (bool, error) {
-	cmd, flags, err := cli.parse(textCmd)
-	if err != nil {
-		return false, err
-	}
+	cmd, flags := cli.parse(textCmd)
 	if cmd == "quit" {
 		return true, nil
 	}
@@ -152,7 +149,7 @@ func (cli *CLI) DoubleValue(flag, c string, flags map[string]string) float64 {
 	return d
 }
 
-func (cli *CLI) parse(cmd string) (string, map[string]string, error) {
+func (cli *CLI) parse(cmd string) (string, map[string]string) {
 	cmd = strings.Trim(cmd, " ")
 	return parse.Parse(cmd)
 }
