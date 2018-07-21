@@ -4,12 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/RomanosTrechlis/go-icls/parse"
-	"strings"
 )
 
-// CLI holds the closing channel.
+// CLI holds the closing channel and the defined commands.
 type CLI struct {
 	commands  map[string]*command
 	closeChan chan struct{}
@@ -48,43 +48,39 @@ func (cli *CLI) Run() {
 
 // Execute parses a string and applies the f function. Returns true for exiting.
 func (cli *CLI) Execute(textCmd string) (bool, error) {
-	cmd, err := cli.parse(textCmd)
+	cmd, flags, err := cli.parse(textCmd)
 	if err != nil {
 		return false, err
 	}
-	if cmd.Command == "quit" {
+	if cmd == "quit" {
 		return true, nil
 	}
-	if cli.Command(cmd.Command) == nil {
-		return false, fmt.Errorf("failed to find command '%s'", cmd.Command)
+	if cli.Command(cmd) == nil {
+		return false, fmt.Errorf("failed to find command '%s'", cmd)
 	}
-	if cmd.help() {
-		fmt.Fprintf(os.Stdout, "%v", cli.Command(cmd.Command))
+	if help(flags) {
+		fmt.Fprintf(os.Stdout, "%v", cli.Command(cmd))
 		return false, nil
 	}
-	handler := cli.Command(cmd.Command).handler
+	handler := cli.Command(cmd).handler
 	if handler == nil {
-		return false, fmt.Errorf("there is no handler for the command '%s'", cmd.Command)
+		return false, fmt.Errorf("there is no handler for the command '%s'", cmd)
 	}
-	return false, handler(*cmd)
+	return false, handler(cmd, flags)
 }
 
-func (cli *CLI) FlagValue(flag string, c Command) string {
-	cmd := cli.Command(c.Command)
+func (cli *CLI) FlagValue(flag, c string, flags map[string]string) string {
+	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
-	if s, ok := c.Flags[f.name]; ok {
+	if s, ok := flags[f.name]; ok {
 		return s
 	}
-	return c.Flags[f.alias]
+	return flags[f.alias]
 }
 
-func (cli *CLI) parse(cmd string) (*Command, error) {
+func (cli *CLI) parse(cmd string) (string, map[string]string, error) {
 	cmd = strings.Trim(cmd, " ")
-	cName, cFlags, err := parse.Parse(cmd)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse command: %v", err)
-	}
-	return &Command{cName, cFlags}, nil
+	return parse.Parse(cmd)
 }
 
 func (cli *CLI) quit() {

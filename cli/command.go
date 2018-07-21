@@ -1,33 +1,12 @@
 package cli
 
-import "fmt"
-
-// Command is the product of parser that holds the
-// name of command and the several flags that might exist.
-type Command struct {
-	Command string
-	Flags   map[string]string
-}
-
-func (c Command) Flag(name string) {
-
-}
-
-func (c Command) String() string {
-	s := c.Command + "\n"
-	for k, v := range c.Flags {
-		s += k + "=\"" + v + "\"\n"
-	}
-	return s
-}
-
-func (c Command) Validate(f func(c Command) error) error {
-	return f(c)
-}
+import (
+	"fmt"
+)
 
 // help checks if there are flags -h or --help and return true
-func (c Command) help() bool {
-	if checkForKeysInMap(c.Flags, "h", "help") {
+func help(flags map[string]string) bool {
+	if checkForKeysInMap(flags, "h", "help") {
 		return true
 	}
 	return false
@@ -42,7 +21,7 @@ type command struct {
 	// contain information on its of them
 	flags []*flag
 	// handler is the function executed when the command is called
-	handler func(c Command) error
+	handler func(cmd string, flags map[string]string) error
 }
 
 // flag holds information on specific flags
@@ -57,7 +36,7 @@ type flag struct {
 }
 
 // New creates a command
-func (cli *CLI) New(name, description string, handler func(cmd Command) error) *command {
+func (cli *CLI) New(name, description string, handler func(cmd string, flags map[string]string) error) *command {
 	cmd := &command{
 		name:        name,
 		description: description,
@@ -78,7 +57,7 @@ func (cli *CLI) Command(name string) *command {
 }
 
 // HandlerFunc adds a handler to the specific command
-func (cli *CLI) HandlerFunc(name string, handler func(cmd Command) error) {
+func (cli *CLI) HandlerFunc(name string, handler func(cmd string, flags map[string]string) error) {
 	cli.Command(name).handler = handler
 }
 
