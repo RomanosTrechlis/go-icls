@@ -11,40 +11,29 @@ import (
 
 // CLI holds the closing channel.
 type CLI struct {
+	commands  map[string]*command
 	closeChan chan struct{}
 }
 
 // New creates a CLI struct.
 func New() *CLI {
 	return &CLI{
+		commands:  make(map[string]*command, 0),
 		closeChan: make(chan struct{}, 1),
 	}
 }
 
 // Run begins reading from the Stdin for ever. Parses the
-// command given and apply it to the function passed as parameter.
-//
-// Example:
-//
-// func main() {
-// 	    c := cli.New()
-//	    c.Run(Test)
-// }
-//
-// func Test(cmd cli.Command) {
-//     if cmd.Command == "get" {
-//	       fmt.Fprintf(os.Stdout, "%v", cmd)
-//	   }
-// }
-//
-func (cli *CLI) Run(f func(c Command)) {
+// command given and apply it to the command handler.
+func (cli *CLI) Run() {
 	scanner := bufio.NewScanner(os.Stdin)
 	go func() {
 		fmt.Fprintf(os.Stdout, "> ")
 		for scanner.Scan() {
-			exit, err := cli.RunCommand(scanner.Text(), f)
+			exit, err := cli.Execute(scanner.Text())
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "command '%s' coudn't be parse: %v", err)
+				fmt.Fprintf(os.Stderr, "command failed: %v\n", err)
+				fmt.Fprintf(os.Stdout, "> ")
 				continue
 			}
 			if exit {
@@ -57,8 +46,8 @@ func (cli *CLI) Run(f func(c Command)) {
 	<-cli.closeChan
 }
 
-// RunCommand parses a string and applies the f function. Returns true for exiting.
-func (cli *CLI) RunCommand(textCmd string, f func(c Command)) (bool, error) {
+// Execute parses a string and applies the f function. Returns true for exiting.
+func (cli *CLI) Execute(textCmd string) (bool, error) {
 	cmd, err := cli.parse(textCmd)
 	if err != nil {
 		return false, err
@@ -66,8 +55,27 @@ func (cli *CLI) RunCommand(textCmd string, f func(c Command)) (bool, error) {
 	if cmd.Command == "quit" {
 		return true, nil
 	}
-	f(*cmd)
-	return false, nil
+	if cli.Command(cmd.Command) == nil {
+		return false, fmt.Errorf("failed to find command '%s'", cmd.Command)
+	}
+	if cmd.help() {
+		fmt.Fprintf(os.Stdout, "%v", cli.Command(cmd.Command))
+		return false, nil
+	}
+	handler := cli.Command(cmd.Command).handler
+	if handler == nil {
+		return false, fmt.Errorf("there is no handler for the command '%s'", cmd.Command)
+	}
+	return false, handler(*cmd)
+}
+
+func (cli *CLI) FlagValue(flag string, c Command) string {
+	cmd := cli.Command(c.Command)
+	f := cmd.getFlag(flag)
+	if s, ok := c.Flags[f.name]; ok {
+		return s
+	}
+	return c.Flags[f.alias]
 }
 
 func (cli *CLI) parse(cmd string) (*Command, error) {
