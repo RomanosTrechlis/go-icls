@@ -24,48 +24,6 @@ type command struct {
 	handler func(cmd string, flags map[string]string) error
 }
 
-// flag holds information on specific flags
-type flag struct {
-	name string
-	// for now allies does nothing
-	alias string
-	// for now dataType does nothing
-	dataType    string
-	description string
-	isRequired  bool
-}
-
-// New creates a command
-func (cli *CLI) New(name, description string, handler func(cmd string, flags map[string]string) error) *command {
-	cmd := &command{
-		name:        name,
-		description: description,
-		flags:       make([]*flag, 0),
-		handler:     handler,
-	}
-	cli.commands[name] = cmd
-	return cmd
-}
-
-// Command returns a command reference
-func (cli *CLI) Command(name string) *command {
-	cmd, ok := cli.commands[name]
-	if !ok {
-		return nil
-	}
-	return cmd
-}
-
-// HandlerFunc adds a handler to the specific command
-func (cli *CLI) HandlerFunc(name string, handler func(cmd string, flags map[string]string) error) {
-	c := cli.Command(name)
-	if c == nil {
-		c = cli.New(name, "", handler)
-		return
-	}
-	c.handler = handler
-}
-
 // Flag add a new flag in the command struct
 func (c *command) Flag(name, alias, dataType, description string, isRequired bool) {
 	if c.flags == nil {
@@ -81,6 +39,26 @@ func (c *command) Flag(name, alias, dataType, description string, isRequired boo
 	}
 
 	c.flags = append(c.flags, flag)
+}
+
+// IntFlag adds an integer type value flag to command.
+func (c *command) IntFlag(name, alias, description string, isRequired bool) {
+	c.Flag(name, alias, "int", description, isRequired)
+}
+
+// FloatFlag adds a float type value flag to command.
+func (c *command) FloatFlag(name, alias, description string, isRequired bool) {
+	c.Flag(name, alias, "float", description, isRequired)
+}
+
+// BoolFlag adds a bool type value flag to command.
+func (c *command) BoolFlag(name, alias, description string, isRequired bool) {
+	c.Flag(name, alias, "bool", description, isRequired)
+}
+
+// StringFlag adds an String type value flag to command.
+func (c *command) StringFlag(name, alias, description string, isRequired bool) {
+	c.Flag(name, alias, "string", description, isRequired)
 }
 
 func (c *command) getFlag(name string) *flag {
@@ -106,31 +84,4 @@ func (c *command) String() string {
 	}
 	n += fmt.Sprintf("\n%s\n", c.description)
 	return n
-}
-
-func (f *flag) String() string {
-	n := "\t"
-	if f.name != "" {
-		n += fmt.Sprintf("-%s\t", f.name)
-	} else {
-		n += fmt.Sprintf("\t")
-	}
-	if f.alias != "" {
-		n += fmt.Sprintf("--%s", f.alias)
-	} else {
-		n += fmt.Sprintf("\t")
-	}
-	n += fmt.Sprintf("\t%s (required: %v)\n", f.description, f.isRequired)
-	return n
-}
-
-func checkForKeysInMap(m map[string]string, keys ...string) bool {
-	for k := range m {
-		for _, key := range keys {
-			if k == key {
-				return true
-			}
-		}
-	}
-	return false
 }
