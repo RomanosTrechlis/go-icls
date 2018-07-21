@@ -31,3 +31,21 @@ func TestGetFlags(t *testing.T) {
 		}
 	}
 }
+
+func TestGetCommand(t *testing.T) {
+	var test = []struct {
+		line string
+		cmd  string
+	}{
+		{"get -f filename", "get"},
+		{"test", "test"},
+		{"", ""},
+	}
+
+	for _, tt := range test {
+		cmd := getCommand(tt.line)
+		if cmd != tt.cmd {
+			t.Errorf("expected '%s', got '%s'", tt.cmd, cmd)
+		}
+	}
+}

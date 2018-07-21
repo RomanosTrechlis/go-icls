@@ -14,12 +14,12 @@ func TestParse(t *testing.T) {
 	}{
 		{"get -d dir -f filename", "get", 2, 2},
 		{"del -d dir -f filename -e", "del", 3, 2},
-		{"rem -d dir -f filename -e -m This is one", "rem", 4, 3},
+		{"rem -d dir -f filename -e --m This is one", "rem", 4, 3},
 		{"add -d dir -f filename -e -m \"This is one\"", "add", 4, 3},
 	}
 
 	for _, tt := range test {
-		cmdName, flags, _ := parse.Parse(tt.cmd)
+		cmdName, flags := parse.Parse(tt.cmd)
 		if cmdName != tt.cmdName {
 			t.Errorf("expected command name to be '%s', instead got '%s'", tt.cmdName, cmdName)
 		}
