@@ -58,7 +58,12 @@ func (cli *CLI) Command(name string) *command {
 
 // HandlerFunc adds a handler to the specific command
 func (cli *CLI) HandlerFunc(name string, handler func(cmd string, flags map[string]string) error) {
-	cli.Command(name).handler = handler
+	c := cli.Command(name)
+	if c == nil {
+		c = cli.New(name, "", handler)
+		return
+	}
+	c.handler = handler
 }
 
 // Flag add a new flag in the command struct
