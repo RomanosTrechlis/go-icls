@@ -17,10 +17,17 @@ func TestGetDataTypeFunction(t *testing.T) {
 		{"int", "asd", "int64", true},
 		{"float", "55.5", "float64", false},
 		{"bool", "true", "bool", false},
+		{"bool2", "true", "nil", false},
 	}
 
 	for _, tt := range test {
 		f := getDataTypeFunction(tt.dt)
+		if f == nil {
+			if tt.out != "nil" {
+				t.Fatalf("expected not nil, got nil")
+			}
+			continue
+		}
 		v, err := f(tt.value)
 		if tt.err && err == nil {
 			t.Errorf("expected error, got %v", v)
