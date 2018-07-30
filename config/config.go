@@ -5,6 +5,7 @@ package config
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -45,7 +46,7 @@ func GetConfigurationFromDir(path string) (*Configuration, error) {
 	_, err := os.Stat(path)
 	if err != nil {
 		createConfigPath(path)
-		return nil, fmt.Errorf("config file doesn't exist")
+		return nil, errors.New("config file doesn't exist")
 	}
 
 	c := &Configuration{
