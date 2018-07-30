@@ -3,6 +3,8 @@ package parse
 import (
 	"fmt"
 	"strings"
+
+	"github.com/RomanosTrechlis/go-icls/util"
 )
 
 // Parse parses the command given and return the command and the flags
@@ -45,20 +47,20 @@ func getFlags(cmd string) map[string]string {
 func getKeyValue(s string) (string, string) {
 	ff := strings.Split(s, " ")
 	if len(ff) == 1 {
-		return strings.Trim(ff[0], " "), ""
+		return util.Trim(ff[0]), ""
 	}
 
 	if len(ff) > 2 {
-		key := strings.Trim(ff[0], " ")
+		key := util.Trim(ff[0])
 		val := ""
 		for i := 1; i < len(ff); i++ {
 			val += ff[i] + " "
 		}
-		val = strings.Trim(val, " ")
+		val = util.Trim(val)
 		val = strings.Replace(val, "\"", "", -1)
 		return key, val
 	}
-	return strings.Trim(ff[0], " "), strings.Trim(ff[1], " ")
+	return util.Trim(ff[0]), util.Trim(ff[1])
 }
 
 func getCommand(cmd string) (string, error) {

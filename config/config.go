@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/RomanosTrechlis/go-icls/util"
 )
 
 type Section map[string]string
@@ -112,7 +114,7 @@ func (c *Configuration) readFile(name string) error {
 			continue
 		}
 		kv := strings.Split(line, "=")
-		c.setNewProperty(currentSectionName, strings.Trim(kv[0], " "), strings.Trim(kv[1], " "))
+		c.setNewProperty(currentSectionName, util.Trim(kv[0]), util.Trim(kv[1]))
 	}
 	return nil
 }

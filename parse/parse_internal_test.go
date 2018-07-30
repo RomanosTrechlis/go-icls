@@ -31,3 +31,18 @@ func TestGetFlags(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkGetKeyValue(b *testing.B) {
+	s := "-d dir "
+	for n := 0; n < b.N; n++ {
+		getKeyValue(s)
+	}
+	s = "-d dir  "
+	for n := 0; n < b.N; n++ {
+		getKeyValue(s)
+	}
+	s = " -d dir"
+	for n := 0; n < b.N; n++ {
+		getKeyValue(s)
+	}
+}

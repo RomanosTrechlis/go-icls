@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/RomanosTrechlis/go-icls/parse"
-	"strings"
+	"github.com/RomanosTrechlis/go-icls/util"
 )
 
 // CLI holds the closing channel.
@@ -71,7 +71,7 @@ func (cli *CLI) RunCommand(textCmd string, f func(c Command)) (bool, error) {
 }
 
 func (cli *CLI) parse(cmd string) (*Command, error) {
-	cmd = strings.Trim(cmd, " ")
+	cmd = util.Trim(cmd)
 	cName, cFlags, err := parse.Parse(cmd)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse command: %v", err)
