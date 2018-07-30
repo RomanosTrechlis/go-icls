@@ -1,7 +1,6 @@
 package parse
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/RomanosTrechlis/go-icls/util"
@@ -23,20 +22,20 @@ import (
 // command with flag value in quotation marks
 // add -d dir -f filename -e -m "This is one"
 //
-func Parse(cmd string) (string, map[string]string, error) {
-	cmdName, err := getCommand(cmd)
-	if err != nil {
-		return "", nil, err
-	}
-
+func Parse(cmd string) (string, map[string]string) {
+	cmdName := getCommand(cmd)
 	flags := getFlags(cmd)
-	return cmdName, flags, nil
+	return cmdName, flags
 }
 
 func getFlags(cmd string) map[string]string {
 	f := strings.Split(cmd, " -")
 	flags := make(map[string]string)
 	for i := 1; i < len(f); i++ {
+		// this is the case that a command is passed with '--' as prefix
+		if strings.HasPrefix(f[i], "-") {
+			f[i] = strings.Replace(f[i], "-", "", 1)
+		}
 		flag := f[i]
 		k, v := getKeyValue(flag)
 		flags[k] = v
@@ -63,10 +62,7 @@ func getKeyValue(s string) (string, string) {
 	return util.Trim(ff[0]), util.Trim(ff[1])
 }
 
-func getCommand(cmd string) (string, error) {
+func getCommand(cmd string) string {
 	ss := strings.Split(cmd, " ")
-	if len(ss) == 0 {
-		return "", fmt.Errorf("failed to read command")
-	}
-	return ss[0], nil
+	return ss[0]
 }
