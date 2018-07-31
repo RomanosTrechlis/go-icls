@@ -5,8 +5,10 @@
 package config_test
 
 import (
-	"github.com/RomanosTrechlis/go-icls/config"
+	"os"
 	"testing"
+
+	"github.com/RomanosTrechlis/go-icls/config"
 )
 
 func TestGetConfigurationFromSingleFile(t *testing.T) {
@@ -33,6 +35,11 @@ func TestGetConfigurationFromSingleFile(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected to fail with error, but didn't: %s", testPath+"nonexistentfile.properties")
 	}
+
+	_, err = config.GetConfigurationFromSingleFile(testPath + "test_no_file.properties")
+	if err == nil {
+		t.Error("expecting error, got no error")
+	}
 }
 
 func TestGetConfigurationFromDir(t *testing.T) {
@@ -56,5 +63,28 @@ func TestGetConfigurationFromDir(t *testing.T) {
 	}
 	if c.C["Specs"]["v"] != "100m/s" {
 		t.Errorf("expected key 'v' to have value '%s', instead it has '%s'", "100m/s", c.C["Specs"]["v"])
+	}
+
+	testPath = "testdata/nopath/"
+	_, err = config.GetConfigurationFromDir(testPath)
+	if err == nil {
+		t.Error("expecting error, got no error")
+	}
+
+	// clean-up 'cause GetConfigurationFromDir creates given folder
+	os.Remove(testPath)
+}
+
+func BenchmarkGetConfigurationFromSingleFile(b *testing.B) {
+	testPath := "testdata/"
+	for n := 0; n < b.N; n++ {
+		config.GetConfigurationFromSingleFile(testPath + "test.properties")
+	}
+}
+
+func BenchmarkGetConfigurationFromDir(b *testing.B) {
+	testPath := "testdata/"
+	for n := 0; n < b.N; n++ {
+		config.GetConfigurationFromDir(testPath)
 	}
 }
