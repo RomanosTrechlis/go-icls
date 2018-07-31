@@ -76,9 +76,10 @@ func (cli *CLI) Execute(textCmd string) (bool, error) {
 }
 
 // New creates a command
-func (cli *CLI) New(name, description string, handler func(flags map[string]string) error) *command {
+func (cli *CLI) New(name, shortDesc, description string, handler func(flags map[string]string) error) *command {
 	cmd := &command{
 		name:        name,
+		shortDesc:   shortDesc,
 		description: description,
 		flags:       make([]*flag, 0),
 		handler:     handler,
@@ -100,7 +101,7 @@ func (cli *CLI) Command(name string) *command {
 func (cli *CLI) HandlerFunc(name string, handler func(flags map[string]string) error) {
 	c := cli.Command(name)
 	if c == nil {
-		c = cli.New(name, "", handler)
+		c = cli.New(name, "", "", handler)
 		return
 	}
 	c.handler = handler

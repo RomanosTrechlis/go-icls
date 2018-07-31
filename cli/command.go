@@ -20,6 +20,7 @@ func help(flags map[string]string) bool {
 // the information necessary to run when it is called
 type command struct {
 	name        string
+	shortDesc   string
 	description string
 	// flags is an array of flag objects that
 	// contain information on its of them
