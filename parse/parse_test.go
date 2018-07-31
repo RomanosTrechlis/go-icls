@@ -5,8 +5,9 @@
 package parse_test
 
 import (
-	"github.com/RomanosTrechlis/go-icls/parse"
 	"testing"
+
+	"github.com/RomanosTrechlis/go-icls/parse"
 )
 
 func TestParse(t *testing.T) {
