@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package cli
+package cli_test
 
 import (
 	"testing"
+
+	"github.com/RomanosTrechlis/go-icls/cli"
 )
 
-func createCLI() *CLI {
-	c := New()
+func createCLI() *cli.CLI {
+	c := cli.New()
 	g := c.New("get", "get gets", func(flags map[string]string) error {
 		return nil
 	})

@@ -64,6 +64,10 @@ func (cli *CLI) Execute(textCmd string) (bool, error) {
 		fmt.Fprintf(os.Stdout, "%v", cli.Command(cmd))
 		return false, nil
 	}
+	flag, ok := cli.validateFlags(cmd, flags)
+	if !ok {
+		return false, fmt.Errorf("flag '%s' is required", flag)
+	}
 	handler := cli.Command(cmd).handler
 	if handler == nil {
 		return false, fmt.Errorf("there is no handler for the command '%s'", cmd)
@@ -160,4 +164,18 @@ func (cli *CLI) parse(cmd string) (string, map[string]string) {
 
 func (cli *CLI) quit() {
 	close(cli.closeChan)
+}
+
+func (cli *CLI) validateFlags(cmd string, flags map[string]string) (string, bool) {
+	c := cli.Command(cmd)
+	for _, f := range c.flags {
+		if !f.isRequired {
+			continue
+		}
+		// additionally the flag must have a value
+		if fl, ok := flags[f.name]; !ok || fl == "" {
+			return f.name, false
+		}
+	}
+	return "", true
 }

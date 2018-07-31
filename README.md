@@ -62,7 +62,7 @@ func main() {
 	// create a new cli
 	c := cli.New()
 	// add 'get' command to cli
-	get := c.New("get", "get gets", func(cmd string, flags map[string]string) error {
+	get := c.New("get", "get gets", func(flags map[string]string) error {
 		fmt.Println("This is the get command")
 		return nil
 	})
@@ -70,7 +70,7 @@ func main() {
 	get.StringFlag("d", "dir", "directory name", false)
 
 	// add 'put' command to cli
-	put := c.New("put", "put puts", func(cmd string, flags map[string]string) error {
+	put := c.New("put", "put puts", func(flags map[string]string) error {
 		fmt.Println("This is the put command")
 		return nil
 	})
@@ -107,4 +107,5 @@ Use the **quit** command to exit the interactive interface.
 - [ ] Add help command for printing the command tree.
 - [ ] Separate short and long command descriptions.
 - [X] Change the signature of the handler function. Remove the command param since it is known to the user beforehand.
-- [ ] Validate for required flags.
+- [X] Validate for required flags.
+- [ ] Enable default values.
