@@ -7,7 +7,7 @@ func Trim(s string) string {
 	for l < n && s[l] == space {
 		l++
 	}
-	for h > l && s[h - 1] == space {
+	for h > l && s[h-1] == space {
 		h--
 	}
 	return s[l:h]
