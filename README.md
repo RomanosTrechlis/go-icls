@@ -13,6 +13,37 @@ go-icls provides an interactive command line interface that takes user input as 
 go-icls provides the functionality to create a configuration structure by reading single *.properties files 
 or by reading entire folder containing multiple *.properties files.
 
+## Structure
+go-icls uses a simple structure for building the command tree. **CLI**, **Command** and **Flag** provide the necessary
+functionality.
+
+### CLI
+**CLI** is the parent of everything. Contains a map of command names and a **Command** structure.
+
+Any command contains several key elements.
+
+    app get -d dir -f file
+
+In the previous example the *app* is the application name, the *get* is the command, and *-d*/*-f* are the flag 
+keys followed by their respective values.
+
+### Command
+**Command** is the pivot point of any cli application. It keeps a name, an alias, a description, an array of **flag**, 
+and more importantly a handler.
+
+### Flag
+**Flag** is a way of providing specific functionality on a broader command. It can be a key-value pair or a single key.
+It must begin with either '-' or '--".
+
+### Handler
+**Handler** is a function that must be passed into the command.
+
+```go
+func(cmd string, flags map[string]string) error
+```
+
+The command then executes this function when called.
+
 ## How to use
 The following example creates a cli with two commands **get** and **put**. Each command has a single flag.
 
@@ -51,23 +82,28 @@ func main() {
 ```
 
 When executing the program:
-```bash
-$ go run main.go
-> get -h
-get
+
+    $ go run main.go
+    > get -h
+    get
         -d      --dir       directory name (required: false)
         -h      --help      prints out information about the command
-get gets
-> get -d test
-This is the get command
-> quit
+    get gets
+    > get -d test
+    This is the get command
+    > quit
 
-$
+    $
+
+In order to include go-icls functionality into an application, import:
+```go
+import "github.com/RomanosTrechlis/go-icls/cli"
 ```
 
 Use the **quit** command to exit the interactive interface.
 
 ## TODO
 
-- [ ] Add help command for all commands
-- [ ] Separate short and long command descriptions
+- [ ] Add help command for printing the command tree.
+- [ ] Separate short and long command descriptions.
+- [ ] Change the signature of the handler function. Remove the command param since it is known to the user beforehand.
