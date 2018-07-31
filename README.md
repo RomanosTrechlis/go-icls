@@ -69,5 +69,5 @@ Use the **quit** command to exit the interactive interface.
 
 ## TODO
 
-1. Add help command for all commands
-1. Separate short and long command descriptions
+- [ ] Add help command for all commands
+- [ ] Separate short and long command descriptions
