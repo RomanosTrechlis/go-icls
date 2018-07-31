@@ -25,7 +25,7 @@ type command struct {
 	// contain information on its of them
 	flags []*flag
 	// handler is the function executed when the command is called
-	handler func(cmd string, flags map[string]string) error
+	handler func(flags map[string]string) error
 }
 
 // Flag add a new flag in the command struct

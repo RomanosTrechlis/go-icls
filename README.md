@@ -106,4 +106,5 @@ Use the **quit** command to exit the interactive interface.
 
 - [ ] Add help command for printing the command tree.
 - [ ] Separate short and long command descriptions.
-- [ ] Change the signature of the handler function. Remove the command param since it is known to the user beforehand.
+- [X] Change the signature of the handler function. Remove the command param since it is known to the user beforehand.
+- [ ] Validate for required flags.

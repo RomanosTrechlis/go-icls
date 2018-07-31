@@ -68,11 +68,11 @@ func (cli *CLI) Execute(textCmd string) (bool, error) {
 	if handler == nil {
 		return false, fmt.Errorf("there is no handler for the command '%s'", cmd)
 	}
-	return false, handler(cmd, flags)
+	return false, handler(flags)
 }
 
 // New creates a command
-func (cli *CLI) New(name, description string, handler func(cmd string, flags map[string]string) error) *command {
+func (cli *CLI) New(name, description string, handler func(flags map[string]string) error) *command {
 	cmd := &command{
 		name:        name,
 		description: description,
@@ -93,7 +93,7 @@ func (cli *CLI) Command(name string) *command {
 }
 
 // HandlerFunc adds a handler to the specific command
-func (cli *CLI) HandlerFunc(name string, handler func(cmd string, flags map[string]string) error) {
+func (cli *CLI) HandlerFunc(name string, handler func(flags map[string]string) error) {
 	c := cli.Command(name)
 	if c == nil {
 		c = cli.New(name, "", handler)
