@@ -33,6 +33,11 @@ func Parse(cmd string) (string, map[string]string) {
 }
 
 func getFlags(cmd string) map[string]string {
+	if strings.HasPrefix(cmd, "-") {
+		// add a space as prefix in order to use the split function
+		cmd = " " + cmd
+	}
+
 	f := strings.Split(cmd, " -")
 	flags := make(map[string]string)
 	for i := 1; i < len(f); i++ {
@@ -68,5 +73,8 @@ func getKeyValue(s string) (string, string) {
 
 func getCommand(cmd string) string {
 	ss := strings.Split(cmd, " ")
+	if strings.HasPrefix(ss[0], "-") {
+		return ""
+	}
 	return ss[0]
 }

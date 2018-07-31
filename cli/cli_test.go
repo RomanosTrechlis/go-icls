@@ -32,6 +32,7 @@ func TestCLI_Execute(t *testing.T) {
 		{"asdf", false, true},
 		{"get -h", false, false},
 		{"get --help", false, false},
+		{"--help", false, false},
 	}
 	for _, tt := range test {
 		b, err := c.Execute(tt.line)

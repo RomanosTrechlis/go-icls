@@ -12,6 +12,8 @@ import (
 
 	"github.com/RomanosTrechlis/go-icls/parse"
 	"github.com/RomanosTrechlis/go-icls/internal/util"
+	"text/tabwriter"
+	"bytes"
 )
 
 // CLI holds the closing channel and the defined commands.
@@ -57,11 +59,11 @@ func (cli *CLI) Execute(textCmd string) (bool, error) {
 	if cmd == "quit" {
 		return true, nil
 	}
-	if cli.Command(cmd) == nil {
+	if cli.Command(cmd) == nil && !help(flags) {
 		return false, fmt.Errorf("failed to find command '%s'", cmd)
 	}
 	if help(flags) {
-		fmt.Fprintf(os.Stdout, "%v", cli.Command(cmd))
+		cli.printHelp(cmd, flags)
 		return false, nil
 	}
 	flag, ok := cli.validateFlags(cmd, flags)
@@ -165,6 +167,28 @@ func (cli *CLI) parse(cmd string) (string, map[string]string) {
 
 func (cli *CLI) quit() {
 	close(cli.closeChan)
+}
+
+func (cli *CLI) printHelp(cmd string, flags map[string]string) {
+	if cmd == "" {
+		fmt.Fprintf(os.Stdout, "%v\n", cli)
+		return
+	}
+	fmt.Fprintf(os.Stdout, "%v", cli.Command(cmd))
+}
+
+func (cli *CLI) String() string {
+	app := os.Args[0]
+	buf := new(bytes.Buffer)
+	fmt.Printf("Usage: %s <command> [options]\n", app)
+	fmt.Printf("Commands:\n")
+	w := tabwriter.NewWriter(buf, 1, 4, 1, ' ', tabwriter.Debug)
+	for k, v := range cli.commands {
+		fmt.Fprintf(w, "  %s\t%s\n", k, v.shortDesc)
+	}
+	w.Flush()
+
+	return string(buf.Bytes())
 }
 
 func (cli *CLI) validateFlags(cmd string, flags map[string]string) (string, bool) {
