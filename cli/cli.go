@@ -11,7 +11,7 @@ import (
 	"strconv"
 
 	"github.com/RomanosTrechlis/go-icls/parse"
-	"github.com/RomanosTrechlis/go-icls/util"
+	"github.com/RomanosTrechlis/go-icls/internal/util"
 )
 
 // CLI holds the closing channel and the defined commands.

@@ -7,7 +7,7 @@ package parse
 import (
 	"strings"
 
-	"github.com/RomanosTrechlis/go-icls/util"
+	"github.com/RomanosTrechlis/go-icls/internal/util"
 )
 
 // Parse parses the command given and return the command and the flags

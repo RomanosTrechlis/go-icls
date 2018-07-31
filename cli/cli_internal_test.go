@@ -4,7 +4,7 @@ import "testing"
 
 func createCLI() *CLI {
 	c := New()
-	g := c.New("get", "get gets", func(flags map[string]string) error {
+	g := c.New("get", "get gets", "get gets", func(flags map[string]string) error {
 		return nil
 	})
 	g.StringFlag("f", "", "", true)

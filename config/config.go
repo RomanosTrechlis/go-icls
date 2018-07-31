@@ -16,7 +16,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/RomanosTrechlis/go-icls/util"
+	"github.com/RomanosTrechlis/go-icls/internal/util"
 )
 
 type Section map[string]string

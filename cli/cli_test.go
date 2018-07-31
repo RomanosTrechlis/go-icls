@@ -12,7 +12,7 @@ import (
 
 func createCLI() *cli.CLI {
 	c := cli.New()
-	g := c.New("get", "get gets", func(flags map[string]string) error {
+	g := c.New("get", "get gets", "get gets", func(flags map[string]string) error {
 		return nil
 	})
 	g.StringFlag("f", "", "", false)
