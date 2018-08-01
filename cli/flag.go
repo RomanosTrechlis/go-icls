@@ -5,20 +5,41 @@
 package cli
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
+	"reflect"
 	"text/tabwriter"
 )
 
 // flag holds information on specific flags
 type flag struct {
-	name string
-	// for now allies does nothing
-	alias string
-	// for now dataType does nothing
-	dataType    string
-	description string
-	isRequired  bool
+	name         string
+	alias        string
+	dataType     string
+	defaultValue interface{}
+	description  string
+	isRequired   bool
+}
+
+func (f *flag) defaultValueToString() string {
+	value := f.defaultValue
+	valueType := reflect.TypeOf(value).String()
+	if "string" == valueType {
+		return fmt.Sprintf("%s", value)
+	}
+	if "int" == valueType {
+		return fmt.Sprintf("%d", value)
+	}
+	if "float32" == valueType {
+		return fmt.Sprintf("%f", value)
+	}
+	if "float64" == valueType {
+		return fmt.Sprintf("%f", value)
+	}
+	if "bool" == valueType {
+		return fmt.Sprintf("%q", value)
+	}
+	return ""
 }
 
 func (f *flag) String() string {
@@ -27,12 +48,12 @@ func (f *flag) String() string {
 
 	var name, alias, req = "", "", ""
 	if f.name != "" {
-		name = fmt.Sprintf( "-%s", f.name)
+		name = fmt.Sprintf("-%s", f.name)
 	}
 	if f.alias != "" {
 		alias = fmt.Sprintf("--%s", f.alias)
 	}
-	desc := fmt.Sprintf( "%s", f.description)
+	desc := fmt.Sprintf("%s", f.description)
 	if f.isRequired {
 		req = fmt.Sprintf("(required: %v)", f.isRequired)
 	}

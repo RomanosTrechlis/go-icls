@@ -67,16 +67,21 @@ func main() {
 		return nil
 	})
 	// add 'get' command flags
-	get.StringFlag("d", "", "directory name", false)
-	get.StringFlag("t", "tetetetetetetet", "directory name", true)
+	get.StringFlag("d", "", "", "directory name", false)
+	get.StringFlag("t", "tetetetetetetet", "", "directory name", true)
 
 	// add 'put' command to cli
 	put := c.New("puttertesttest", "putter puts", "putter puts", func(flags map[string]string) error {
-		fmt.Println("This is the putter command")
+		i, err := c.IntValue("g", "puttertesttest", flags)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("This is the putter command: %d\n", i)
 		return nil
 	})
 	// add 'put' command flags
-	put.StringFlag("f", "file", "filename to put", true)
+	put.StringFlag("f", "file", "", "filename to put", true)
+	put.IntFlag("g", "int", 1, "int to put", false)
 
 	c.Run()
 }
@@ -127,6 +132,6 @@ Use the **quit** command to exit the interactive interface.
 - [X] Separate short and long command descriptions. Short must appear in general command tree help.
 - [X] Change the signature of the handler function. Remove the command param since it is known to the user beforehand.
 - [X] Validate for required flags.
-- [ ] Enable default values.
+- [X] Enable default values.
 - [ ] Add more tests.
 - [ ] Add var name on printed help after non bool flag.

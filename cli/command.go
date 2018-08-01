@@ -7,6 +7,7 @@ package cli
 import (
 	"fmt"
 	"sort"
+	"reflect"
 )
 
 // help checks if there are flags -h or --help and return true
@@ -23,44 +24,51 @@ type command struct {
 	name        string
 	shortDesc   string
 	description string
-	// flags is an array of flag objects that
-	// contain information on its of them
-	flags []*flag
+	// flags is a map of flag objects that
+	// contain information on them
+	flags map[string]*flag
 	// handler is the function executed when the command is called
 	handler func(flags map[string]string) error
 }
 
 // Flag add a new flag in the command struct
-func (c *command) Flag(name, alias, dataType, description string, isRequired bool) {
-	flag := &flag{
-		name:        name,
-		alias:       alias,
-		dataType:    dataType,
-		description: description,
-		isRequired:  isRequired,
+func (c *command) Flag(name, alias, dataType string, defaultValue interface{}, description string, isRequired bool) error {
+	if defaultValue != nil && reflect.TypeOf(defaultValue).String() != dataType {
+		return fmt.Errorf("default value %v, is of type %s, expecting type %s", defaultValue,
+			reflect.TypeOf(defaultValue).String(), dataType)
 	}
 
-	c.flags = append(c.flags, flag)
+	flag := &flag{
+		name:         name,
+		alias:        alias,
+		dataType:     dataType,
+		defaultValue: defaultValue,
+		description:  description,
+		isRequired:   isRequired,
+	}
+
+	c.flags[name] = flag
+	return nil
 }
 
 // IntFlag adds an integer type value flag to command.
-func (c *command) IntFlag(name, alias, description string, isRequired bool) {
-	c.Flag(name, alias, "int", description, isRequired)
+func (c *command) IntFlag(name, alias string, defaultValue int, description string, isRequired bool) {
+	c.Flag(name, alias, "int", defaultValue, description, isRequired)
 }
 
 // FloatFlag adds a float type value flag to command.
-func (c *command) FloatFlag(name, alias, description string, isRequired bool) {
-	c.Flag(name, alias, "float", description, isRequired)
+func (c *command) FloatFlag(name, alias string, defaultValue float64, description string, isRequired bool) {
+	c.Flag(name, alias, "float64", defaultValue, description, isRequired)
 }
 
 // BoolFlag adds a bool type value flag to command.
-func (c *command) BoolFlag(name, alias, description string, isRequired bool) {
-	c.Flag(name, alias, "bool", description, isRequired)
+func (c *command) BoolFlag(name, alias string, defaultValue bool, description string, isRequired bool) {
+	c.Flag(name, alias, "bool", defaultValue, description, isRequired)
 }
 
 // StringFlag adds an String type value flag to command.
-func (c *command) StringFlag(name, alias, description string, isRequired bool) {
-	c.Flag(name, alias, "string", description, isRequired)
+func (c *command) StringFlag(name, alias string, defaultValue string, description string, isRequired bool) {
+	c.Flag(name, alias, "string", defaultValue, description, isRequired)
 }
 
 func (c *command) getFlag(name string) *flag {
@@ -77,34 +85,25 @@ func (c *command) String() string {
 	n += fmt.Sprintf("%s\n", c.description)
 	n += fmt.Sprintf("\nFlags: \n\n")
 
-	flagMap := createFlagMapFromArray(c.flags)
-	if _, ok := flagMap["h"]; !ok {
-		flagMap["h"] = &flag{
-			name: "h",
-			alias: "help",
-			dataType: "bool",
+	if _, ok := c.flags["h"]; !ok {
+		c.flags["h"] = &flag{
+			name:        "h",
+			alias:       "help",
+			dataType:    "bool",
 			description: "prints out information about the command",
-			isRequired: false}
+			isRequired:  false}
 	}
 
-	keys := make([]string, 0, len(flagMap))
-	for k := range flagMap {
+	keys := make([]string, 0, len(c.flags))
+	for k := range c.flags {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 
 	for _, k := range keys {
-		f := flagMap[k]
+		f := c.flags[k]
 		n += fmt.Sprint(f)
 	}
 
 	return n
-}
-
-func createFlagMapFromArray(ff []*flag) map[string]*flag {
-	flagMap := make(map[string]*flag, len(ff))
-	for _, f := range ff {
-		flagMap[f.name] = f
-	}
-	return flagMap
 }

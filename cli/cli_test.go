@@ -64,11 +64,11 @@ func createCLI() *cli.CLI {
 		}
 		return nil
 	})
-	g.StringFlag("f", "string", "", false)
-	g.IntFlag("g", "int", "", false)
-	g.BoolFlag("b", "bool", "", false)
-	g.FloatFlag("l", "float", "", false)
-	g.StringFlag("r", "req", "", true)
+	g.StringFlag("f", "string", "", "", false)
+	g.IntFlag("g", "int", 0, "", false)
+	g.BoolFlag("b", "bool", false, "", false)
+	g.FloatFlag("l", "float", 0.0, "", false)
+	g.StringFlag("r", "req", "", "", true)
 
 	c.HandlerFunc("put", func(flags map[string]string) error {
 		return nil
@@ -98,8 +98,7 @@ func TestCLI_Execute(t *testing.T) {
 		{"--help", false, false},
 		{"get -g fail  -r t", false, true},
 		{"get -g 1  -r t", false, false},
-		{"get -b fail -r t", false, true},
-		{"get -b true -r t", false, false},
+		{"get -b -r t", false, false},
 		{"get -l 1.0 -r t", false, false},
 		{"get -l fail -r t", false, true},
 
@@ -116,7 +115,7 @@ func TestCLI_Execute(t *testing.T) {
 			t.Errorf("expected '%v', got '%v'", tt.quit, b)
 		}
 		if err == nil && tt.err {
-			t.Errorf("expected error, got no error")
+			t.Errorf("expected error, got no error: %s", tt.line)
 		}
 		if err != nil && !tt.err {
 			t.Errorf("expected no error, got '%v'", err)

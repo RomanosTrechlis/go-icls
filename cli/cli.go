@@ -6,14 +6,14 @@ package cli
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"strconv"
-
-	"github.com/RomanosTrechlis/go-icls/parse"
-	"github.com/RomanosTrechlis/go-icls/internal/util"
 	"text/tabwriter"
-	"bytes"
+
+	"github.com/RomanosTrechlis/go-icls/internal/util"
+	"github.com/RomanosTrechlis/go-icls/parse"
 )
 
 // CLI holds the closing channel and the defined commands.
@@ -83,7 +83,7 @@ func (cli *CLI) New(name, shortDesc, description string, handler func(flags map[
 		name:        name,
 		shortDesc:   shortDesc,
 		description: description,
-		flags:       make([]*flag, 0),
+		flags:       make(map[string]*flag, 0),
 		handler:     handler,
 	}
 	cli.commands[name] = cmd
@@ -112,48 +112,57 @@ func (cli *CLI) HandlerFunc(commandName string, handler func(flags map[string]st
 func (cli *CLI) FlagValue(command, flag string, flags map[string]string) (interface{}, error) {
 	cmd := cli.Command(command)
 	f := cmd.getFlag(flag)
-	if s, ok := flags[f.name]; ok {
-		return conv(s, getDataTypeFunction(f.dataType))
-	}
-	return conv(flags[f.alias], getDataTypeFunction(f.dataType))
+	s := cli.getValueFromFlag(f, flags)
+	return conv(s, getDataTypeFunction(f.dataType))
 }
 
 func (cli *CLI) StringValue(flag, c string, flags map[string]string) string {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
-	if s, ok := flags[f.name]; ok {
-		return s
-	}
-	return flags[f.alias]
+	s := cli.getValueFromFlag(f, flags)
+	return s
 }
 
 func (cli *CLI) BoolValue(flag, c string, flags map[string]string) (bool, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
-	if s, ok := flags[f.name]; ok {
-		return strconv.ParseBool(s)
-	}
-	return strconv.ParseBool(flags[f.alias])
+	s := cli.getValueFromFlag(f, flags)
+	return strconv.ParseBool(s)
 }
 
 func (cli *CLI) IntValue(flag, c string, flags map[string]string) (int, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
-	if s, ok := flags[f.name]; ok {
-		i, err := strconv.Atoi(s)
-		return i, err
-	}
-	i, err := strconv.Atoi(flags[f.alias])
+	s := cli.getValueFromFlag(f, flags)
+	i, err := strconv.Atoi(s)
 	return i, err
 }
 
 func (cli *CLI) DoubleValue(flag, c string, flags map[string]string) (float64, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
-	if s, ok := flags[f.name]; ok {
-		return strconv.ParseFloat(s, 64)
+	if f == nil {
+		return 0.0, fmt.Errorf("couldn't find flag '%s' in command tree", flag)
 	}
-	return strconv.ParseFloat(flags[f.alias], 64)
+	s := cli.getValueFromFlag(f, flags)
+	return strconv.ParseFloat(s, 64)
+}
+
+func (cli *CLI) getValueFromFlag(flag *flag, flags map[string]string) string {
+	if s, ok := flags[flag.name]; ok {
+		if flag.dataType == "bool" {
+			return "true"
+		}
+		return s
+	}
+	if s, ok := flags[flag.alias]; ok {
+		if flag.dataType == "bool" {
+			return "true"
+		}
+		return s
+	}
+
+	return flag.defaultValueToString()
 }
 
 func (cli *CLI) parse(cmd string) (string, map[string]string) {

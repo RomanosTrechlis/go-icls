@@ -7,8 +7,8 @@ func createCLI() *CLI {
 	g := c.New("get", "get gets", "get gets", func(flags map[string]string) error {
 		return nil
 	})
-	g.StringFlag("f", "", "", true)
-	g.IntFlag("g", "", "", false)
+	g.StringFlag("f", "", "", "", true)
+	g.IntFlag("g", "", 1, "", false)
 	return c
 }
 
