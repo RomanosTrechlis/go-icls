@@ -6,6 +6,7 @@ package cli
 
 import (
 	"fmt"
+	"sort"
 )
 
 // help checks if there are flags -h or --help and return true
@@ -76,17 +77,38 @@ func (c *command) getFlag(name string) *flag {
 }
 
 func (c *command) String() string {
-	n := fmt.Sprintf("%s\n", c.name)
-	hasHelpFlag := false
-	for _, f := range c.flags {
+	n := fmt.Sprintf("usage: %s [%s flags]\n\n", c.name, c.name)
+	n += fmt.Sprintf("%s\n", c.description)
+	n += fmt.Sprintf("\nFlags: \n\n")
+
+	flagMap := createFlagMapFromArray(c.flags)
+	if _, ok := flagMap["h"]; !ok {
+		flagMap["h"] = &flag{
+			name: "h",
+			alias: "help",
+			dataType: "bool",
+			description: "prints out information about the command",
+			isRequired: false}
+	}
+
+	keys := make([]string, 0, len(flagMap))
+	for k := range flagMap {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		f := flagMap[k]
 		n += fmt.Sprint(f)
-		if f.name == "h" || f.alias == "help" {
-			hasHelpFlag = true
-		}
 	}
-	if !hasHelpFlag {
-		n += fmt.Sprintf("\t-%s\t--%s\t\t%s", "h", "help", "prints out information about the command")
-	}
-	n += fmt.Sprintf("\n%s\n", c.description)
+
 	return n
+}
+
+func createFlagMapFromArray(ff []*flag) map[string]*flag {
+	flagMap := make(map[string]*flag, len(ff))
+	for _, f := range ff {
+		flagMap[f.name] = f
+	}
+	return flagMap
 }

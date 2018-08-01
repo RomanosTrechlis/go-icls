@@ -180,12 +180,13 @@ func (cli *CLI) printHelp(cmd string, flags map[string]string) {
 func (cli *CLI) String() string {
 	app := os.Args[0]
 	buf := new(bytes.Buffer)
-	fmt.Printf("Usage: %s <command> [options]\n", app)
-	fmt.Printf("Commands:\n")
-	w := tabwriter.NewWriter(buf, 1, 4, 1, ' ', tabwriter.Debug)
+	w := tabwriter.NewWriter(buf, 1, 8, 8, ' ', tabwriter.TabIndent)
+	fmt.Fprintf(w, "Usage:\n\n\t%s <command> [options]\n\n", app)
+	fmt.Fprintf(w, "Commands:\n")
 	for k, v := range cli.commands {
-		fmt.Fprintf(w, "  %s\t%s\n", k, v.shortDesc)
+		fmt.Fprintf(w, "\t%s\t%s\n", k, v.shortDesc)
 	}
+	fmt.Fprintf(w, "\nUse \"%s <command> -h\" for more information about a command.", app)
 	w.Flush()
 
 	return string(buf.Bytes())

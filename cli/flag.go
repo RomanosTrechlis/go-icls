@@ -4,7 +4,11 @@
 
 package cli
 
-import "fmt"
+import (
+	"fmt"
+	"bytes"
+	"text/tabwriter"
+)
 
 // flag holds information on specific flags
 type flag struct {
@@ -18,17 +22,22 @@ type flag struct {
 }
 
 func (f *flag) String() string {
-	n := "\t"
+	buf := new(bytes.Buffer)
+	w := tabwriter.NewWriter(buf, 1, 8, 4, ' ', tabwriter.TabIndent)
+
+	var name, alias, req = "", "", ""
 	if f.name != "" {
-		n += fmt.Sprintf("-%s\t", f.name)
-	} else {
-		n += fmt.Sprintf("\t")
+		name = fmt.Sprintf( "-%s", f.name)
 	}
 	if f.alias != "" {
-		n += fmt.Sprintf("--%s", f.alias)
-	} else {
-		n += fmt.Sprintf("\t")
+		alias = fmt.Sprintf("--%s", f.alias)
 	}
-	n += fmt.Sprintf("\t%s (required: %v)\n", f.description, f.isRequired)
-	return n
+	desc := fmt.Sprintf( "%s", f.description)
+	if f.isRequired {
+		req = fmt.Sprintf("(required: %v)", f.isRequired)
+	}
+	fmt.Fprintf(w, "\t%s\t%s\n\t\t\t\t%s %s\n", name, alias, desc, req)
+	w.Flush()
+
+	return string(buf.Bytes())
 }

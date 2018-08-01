@@ -67,11 +67,12 @@ func main() {
 		return nil
 	})
 	// add 'get' command flags
-	get.StringFlag("d", "dir", "directory name", false)
+	get.StringFlag("d", "", "directory name", false)
+	get.StringFlag("t", "tetetetetetetet", "directory name", true)
 
 	// add 'put' command to cli
-	put := c.New("put", "put puts", "put puts", func(flags map[string]string) error {
-		fmt.Println("This is the put command")
+	put := c.New("puttertesttest", "putter puts", "putter puts", func(flags map[string]string) error {
+		fmt.Println("This is the putter command")
 		return nil
 	})
 	// add 'put' command flags
@@ -83,12 +84,30 @@ func main() {
 
 When executing the program:
 
-    $ go run main.go
+    $ go-icls
+    > -h
+    Usage:
+    
+            go-icls.exe <command> [options]
+    
+    Commands:
+            get                   get gets
+            puttertesttest        putter puts
+    
+    Use "go-icls.exe <command> -h" for more information about a command.
     > get -h
-    get
-        -d      --dir       directory name (required: false)
-        -h      --help      prints out information about the command
+    usage: get [get flags]
+    
     get gets
+    
+    Flags:
+    
+            -d
+                                    directory name
+            -h    --help
+                                    prints out information about the command
+            -t    --tetetetetetetet
+                                    directory name (required: true)
     > get -d test
     This is the get command
     > quit
@@ -104,9 +123,10 @@ Use the **quit** command to exit the interactive interface.
 
 ## TODO
 
-- [ ] Add help command for printing the command tree.
+- [X] Add help command for printing the command tree.
 - [X] Separate short and long command descriptions. Short must appear in general command tree help.
 - [X] Change the signature of the handler function. Remove the command param since it is known to the user beforehand.
 - [X] Validate for required flags.
 - [ ] Enable default values.
 - [ ] Add more tests.
+- [ ] Add var name on printed help after non bool flag.
