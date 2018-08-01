@@ -37,7 +37,7 @@ func (f *flag) defaultValueToString() string {
 		return fmt.Sprintf("%f", value)
 	}
 	if "bool" == valueType {
-		return fmt.Sprintf("%q", value)
+		return fmt.Sprintf("%t", value)
 	}
 	return ""
 }
