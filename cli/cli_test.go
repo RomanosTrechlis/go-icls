@@ -78,6 +78,8 @@ func createCLI() *cli.CLI {
 	c.HandlerFunc("test", func(flags map[string]string) error {
 		return nil
 	})
+
+	c.New("nohandler", "", "", nil)
 	return c
 }
 
@@ -106,6 +108,7 @@ func TestCLI_Execute(t *testing.T) {
 		{"get --float 1.0 -r t", false, false},
 		{"get --string success -r t", false, false},
 		{"get --string success", false, true},
+		{"nohandler", false, true},
 	}
 	for _, tt := range test {
 		b, err := c.Execute(tt.line)

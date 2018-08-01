@@ -136,15 +136,15 @@ func (cli *CLI) BoolValue(flag, c string, flags map[string]string) (bool, error)
 	return strconv.ParseBool(flags[f.alias])
 }
 
-func (cli *CLI) IntValue(flag, c string, flags map[string]string) (int64, error) {
+func (cli *CLI) IntValue(flag, c string, flags map[string]string) (int, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
 	if s, ok := flags[f.name]; ok {
 		i, err := strconv.Atoi(s)
-		return int64(i), err
+		return i, err
 	}
 	i, err := strconv.Atoi(flags[f.alias])
-	return int64(i), err
+	return i, err
 }
 
 func (cli *CLI) DoubleValue(flag, c string, flags map[string]string) (float64, error) {
