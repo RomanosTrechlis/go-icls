@@ -39,7 +39,7 @@ It must begin with either '-' or '--".
 **Handler** is a function that must be passed into the command.
 
 ```go
-func(cmd string, flags map[string]string) error
+func(flags map[string]string) error
 ```
 
 The command then executes this function when called.
