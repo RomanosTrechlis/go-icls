@@ -1,12 +1,18 @@
+// Copyright 2017 The go-icls Authors.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package cli
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
+	"text/tabwriter"
 
+	"github.com/RomanosTrechlis/go-icls/internal/util"
 	"github.com/RomanosTrechlis/go-icls/parse"
 )
 
@@ -53,26 +59,31 @@ func (cli *CLI) Execute(textCmd string) (bool, error) {
 	if cmd == "quit" {
 		return true, nil
 	}
-	if cli.Command(cmd) == nil {
+	if cli.Command(cmd) == nil && !help(flags) {
 		return false, fmt.Errorf("failed to find command '%s'", cmd)
 	}
 	if help(flags) {
-		fmt.Fprintf(os.Stdout, "%v", cli.Command(cmd))
+		cli.printHelp(cmd, flags)
 		return false, nil
+	}
+	flag, ok := cli.validateFlags(cmd, flags)
+	if !ok {
+		return false, fmt.Errorf("flag '%s' is required", flag)
 	}
 	handler := cli.Command(cmd).handler
 	if handler == nil {
 		return false, fmt.Errorf("there is no handler for the command '%s'", cmd)
 	}
-	return false, handler(cmd, flags)
+	return false, handler(flags)
 }
 
 // New creates a command
-func (cli *CLI) New(name, description string, handler func(cmd string, flags map[string]string) error) *command {
+func (cli *CLI) New(name, shortDesc, description string, handler func(flags map[string]string) error) *command {
 	cmd := &command{
 		name:        name,
+		shortDesc:   shortDesc,
 		description: description,
-		flags:       make([]*flag, 0),
+		flags:       make(map[string]*flag, 0),
 		handler:     handler,
 	}
 	cli.commands[name] = cmd
@@ -89,71 +100,113 @@ func (cli *CLI) Command(name string) *command {
 }
 
 // HandlerFunc adds a handler to the specific command
-func (cli *CLI) HandlerFunc(name string, handler func(cmd string, flags map[string]string) error) {
-	c := cli.Command(name)
+func (cli *CLI) HandlerFunc(commandName string, handler func(flags map[string]string) error) {
+	c := cli.Command(commandName)
 	if c == nil {
-		c = cli.New(name, "", handler)
+		c = cli.New(commandName, "", "", handler)
 		return
 	}
 	c.handler = handler
 }
 
-func (cli *CLI) FlagValue(command, flag string, flags map[string]string) interface{} {
+func (cli *CLI) FlagValue(command, flag string, flags map[string]string) (interface{}, error) {
 	cmd := cli.Command(command)
 	f := cmd.getFlag(flag)
-	if s, ok := flags[f.name]; ok {
-		return conv(s, getDataTypeFunction(f.dataType))
-	}
-	return conv(flags[f.alias], getDataTypeFunction(f.dataType))
+	s := cli.getValueFromFlag(f, flags)
+	return conv(s, getDataTypeFunction(f.dataType))
 }
 
 func (cli *CLI) StringValue(flag, c string, flags map[string]string) string {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
-	if s, ok := flags[f.name]; ok {
+	s := cli.getValueFromFlag(f, flags)
+	return s
+}
+
+func (cli *CLI) BoolValue(flag, c string, flags map[string]string) (bool, error) {
+	cmd := cli.Command(c)
+	f := cmd.getFlag(flag)
+	s := cli.getValueFromFlag(f, flags)
+	return strconv.ParseBool(s)
+}
+
+func (cli *CLI) IntValue(flag, c string, flags map[string]string) (int, error) {
+	cmd := cli.Command(c)
+	f := cmd.getFlag(flag)
+	s := cli.getValueFromFlag(f, flags)
+	i, err := strconv.Atoi(s)
+	return i, err
+}
+
+func (cli *CLI) DoubleValue(flag, c string, flags map[string]string) (float64, error) {
+	cmd := cli.Command(c)
+	f := cmd.getFlag(flag)
+	if f == nil {
+		return 0.0, fmt.Errorf("couldn't find flag '%s' in command tree", flag)
+	}
+	s := cli.getValueFromFlag(f, flags)
+	return strconv.ParseFloat(s, 64)
+}
+
+func (cli *CLI) getValueFromFlag(flag *flag, flags map[string]string) string {
+	if s, ok := flags[flag.name]; ok {
+		if flag.dataType == "bool" {
+			return "true"
+		}
 		return s
 	}
-	return flags[f.alias]
-}
-
-func (cli *CLI) BoolValue(flag, c string, flags map[string]string) bool {
-	cmd := cli.Command(c)
-	f := cmd.getFlag(flag)
-	if s, ok := flags[f.name]; ok {
-		b, _ := strconv.ParseBool(s)
-		return b
+	if s, ok := flags[flag.alias]; ok {
+		if flag.dataType == "bool" {
+			return "true"
+		}
+		return s
 	}
-	b, _ := strconv.ParseBool(flags[f.alias])
-	return b
-}
 
-func (cli *CLI) IntValue(flag, c string, flags map[string]string) int64 {
-	cmd := cli.Command(c)
-	f := cmd.getFlag(flag)
-	if s, ok := flags[f.name]; ok {
-		i, _ := strconv.Atoi(s)
-		return int64(i)
-	}
-	i, _ := strconv.Atoi(flags[f.alias])
-	return int64(i)
-}
-
-func (cli *CLI) DoubleValue(flag, c string, flags map[string]string) float64 {
-	cmd := cli.Command(c)
-	f := cmd.getFlag(flag)
-	if s, ok := flags[f.name]; ok {
-		d, _ := strconv.ParseFloat(s, 64)
-		return d
-	}
-	d, _ := strconv.ParseFloat(flags[f.alias], 64)
-	return d
+	return flag.defaultValueToString()
 }
 
 func (cli *CLI) parse(cmd string) (string, map[string]string) {
-	cmd = strings.Trim(cmd, " ")
+	cmd = util.Trim(cmd)
 	return parse.Parse(cmd)
 }
 
 func (cli *CLI) quit() {
 	close(cli.closeChan)
+}
+
+func (cli *CLI) printHelp(cmd string, flags map[string]string) {
+	if cmd == "" {
+		fmt.Fprintf(os.Stdout, "%v\n", cli)
+		return
+	}
+	fmt.Fprintf(os.Stdout, "%v", cli.Command(cmd))
+}
+
+func (cli *CLI) String() string {
+	app := os.Args[0]
+	buf := new(bytes.Buffer)
+	w := tabwriter.NewWriter(buf, 1, 8, 8, ' ', tabwriter.TabIndent)
+	fmt.Fprintf(w, "Usage:\n\n\t%s <command> [options]\n\n", app)
+	fmt.Fprintf(w, "Commands:\n")
+	for k, v := range cli.commands {
+		fmt.Fprintf(w, "\t%s\t%s\n", k, v.shortDesc)
+	}
+	fmt.Fprintf(w, "\nUse \"%s <command> -h\" for more information about a command.", app)
+	w.Flush()
+
+	return string(buf.Bytes())
+}
+
+func (cli *CLI) validateFlags(cmd string, flags map[string]string) (string, bool) {
+	c := cli.Command(cmd)
+	for _, f := range c.flags {
+		if !f.isRequired {
+			continue
+		}
+		// additionally the flag must have a value
+		if fl, ok := flags[f.name]; !ok || fl == "" {
+			return f.name, false
+		}
+	}
+	return "", true
 }

@@ -1,3 +1,7 @@
+// Copyright 2017 The go-icls Authors.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package cli
 
 import (
@@ -59,7 +63,7 @@ func TestConv(t *testing.T) {
 	}
 
 	for _, tt := range test {
-		i := conv(tt.value, tt.f)
+		i, _ := conv(tt.value, tt.f)
 		if reflect.TypeOf(i).String() != tt.out {
 			t.Errorf("expected '%s', got '%s'", tt.out, reflect.TypeOf(i).String())
 		}

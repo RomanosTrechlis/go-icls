@@ -1,3 +1,7 @@
+// Copyright 2017 The go-icls Authors.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package config reads from a specific local directory
 // all files ending in '.properties' and creates a map
 // containing the configuration.
@@ -5,11 +9,14 @@ package config
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/RomanosTrechlis/go-icls/internal/util"
 )
 
 type Section map[string]string
@@ -43,7 +50,7 @@ func GetConfigurationFromDir(path string) (*Configuration, error) {
 	_, err := os.Stat(path)
 	if err != nil {
 		createConfigPath(path)
-		return nil, fmt.Errorf("config file doesn't exist")
+		return nil, errors.New("config file doesn't exist")
 	}
 
 	c := &Configuration{
@@ -112,7 +119,7 @@ func (c *Configuration) readFile(name string) error {
 			continue
 		}
 		kv := strings.Split(line, "=")
-		c.setNewProperty(currentSectionName, strings.Trim(kv[0], " "), strings.Trim(kv[1], " "))
+		c.setNewProperty(currentSectionName, util.Trim(kv[0]), util.Trim(kv[1]))
 	}
 	return nil
 }

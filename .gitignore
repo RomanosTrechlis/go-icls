@@ -3,3 +3,6 @@
 go-icls.iml
 
 **/*.exe
+**/*.svg
+**/*.prof
+**/*.out

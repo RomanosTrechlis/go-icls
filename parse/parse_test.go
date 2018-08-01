@@ -1,8 +1,13 @@
+// Copyright 2017 The go-icls Authors.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package parse_test
 
 import (
-	"github.com/RomanosTrechlis/go-icls/parse"
 	"testing"
+
+	"github.com/RomanosTrechlis/go-icls/parse"
 )
 
 func TestParse(t *testing.T) {
@@ -16,6 +21,7 @@ func TestParse(t *testing.T) {
 		{"del -d dir -f filename -e", "del", 3, 2},
 		{"rem -d dir -f filename -e --m This is one", "rem", 4, 3},
 		{"add -d dir -f filename -e -m \"This is one\"", "add", 4, 3},
+		{"-h", "", 1, 0},
 	}
 
 	for _, tt := range test {

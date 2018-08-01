@@ -1,3 +1,7 @@
+// Copyright 2017 The go-icls Authors.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package parse
 
 import "testing"
@@ -47,5 +51,35 @@ func TestGetCommand(t *testing.T) {
 		if cmd != tt.cmd {
 			t.Errorf("expected '%s', got '%s'", tt.cmd, cmd)
 		}
+	}
+}
+
+func BenchmarkParse(b *testing.B) {
+	s := "get -d dir -f filename"
+	for n := 0; n < b.N; n++ {
+		Parse(s)
+	}
+	s = "get -d dir -f filename -e"
+	for n := 0; n < b.N; n++ {
+		Parse(s)
+	}
+	s = "get -d dir -f filename -e -m This is one"
+	for n := 0; n < b.N; n++ {
+		Parse(s)
+	}
+}
+
+func BenchmarkGetKeyValue(b *testing.B) {
+	s := "-d dir "
+	for n := 0; n < b.N; n++ {
+		getKeyValue(s)
+	}
+	s = "-d dir  "
+	for n := 0; n < b.N; n++ {
+		getKeyValue(s)
+	}
+	s = " -d dir"
+	for n := 0; n < b.N; n++ {
+		getKeyValue(s)
 	}
 }

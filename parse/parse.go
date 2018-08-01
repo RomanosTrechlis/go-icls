@@ -1,7 +1,13 @@
+// Copyright 2017 The go-icls Authors.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package parse
 
 import (
 	"strings"
+
+	"github.com/RomanosTrechlis/go-icls/internal/util"
 )
 
 // Parse parses the command given and return the command and the flags
@@ -27,6 +33,11 @@ func Parse(cmd string) (string, map[string]string) {
 }
 
 func getFlags(cmd string) map[string]string {
+	if strings.HasPrefix(cmd, "-") {
+		// add a space as prefix in order to use the split function
+		cmd = " " + cmd
+	}
+
 	f := strings.Split(cmd, " -")
 	flags := make(map[string]string)
 	for i := 1; i < len(f); i++ {
@@ -44,23 +55,26 @@ func getFlags(cmd string) map[string]string {
 func getKeyValue(s string) (string, string) {
 	ff := strings.Split(s, " ")
 	if len(ff) == 1 {
-		return strings.Trim(ff[0], " "), ""
+		return util.Trim(ff[0]), ""
 	}
 
 	if len(ff) > 2 {
-		key := strings.Trim(ff[0], " ")
+		key := util.Trim(ff[0])
 		val := ""
 		for i := 1; i < len(ff); i++ {
 			val += ff[i] + " "
 		}
-		val = strings.Trim(val, " ")
+		val = util.Trim(val)
 		val = strings.Replace(val, "\"", "", -1)
 		return key, val
 	}
-	return strings.Trim(ff[0], " "), strings.Trim(ff[1], " ")
+	return util.Trim(ff[0]), util.Trim(ff[1])
 }
 
 func getCommand(cmd string) string {
 	ss := strings.Split(cmd, " ")
+	if strings.HasPrefix(ss[0], "-") {
+		return ""
+	}
 	return ss[0]
 }
