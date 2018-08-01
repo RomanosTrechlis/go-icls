@@ -35,9 +35,8 @@ func getDataTypeFunction(dt string) func(string) (interface{}, error) {
 	return nil
 }
 
-func conv(t string, f func(s string) (interface{}, error)) interface{} {
-	i, _ := f(t)
-	return i
+func conv(t string, f func(s string) (interface{}, error)) (interface{}, error) {
+	return f(t)
 }
 
 func checkForKeysInMap(m map[string]string, keys ...string) bool {

@@ -100,16 +100,16 @@ func (cli *CLI) Command(name string) *command {
 }
 
 // HandlerFunc adds a handler to the specific command
-func (cli *CLI) HandlerFunc(name string, handler func(flags map[string]string) error) {
-	c := cli.Command(name)
+func (cli *CLI) HandlerFunc(commandName string, handler func(flags map[string]string) error) {
+	c := cli.Command(commandName)
 	if c == nil {
-		c = cli.New(name, "", "", handler)
+		c = cli.New(commandName, "", "", handler)
 		return
 	}
 	c.handler = handler
 }
 
-func (cli *CLI) FlagValue(command, flag string, flags map[string]string) interface{} {
+func (cli *CLI) FlagValue(command, flag string, flags map[string]string) (interface{}, error) {
 	cmd := cli.Command(command)
 	f := cmd.getFlag(flag)
 	if s, ok := flags[f.name]; ok {
@@ -127,37 +127,33 @@ func (cli *CLI) StringValue(flag, c string, flags map[string]string) string {
 	return flags[f.alias]
 }
 
-func (cli *CLI) BoolValue(flag, c string, flags map[string]string) bool {
+func (cli *CLI) BoolValue(flag, c string, flags map[string]string) (bool, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
 	if s, ok := flags[f.name]; ok {
-		b, _ := strconv.ParseBool(s)
-		return b
+		return strconv.ParseBool(s)
 	}
-	b, _ := strconv.ParseBool(flags[f.alias])
-	return b
+	return strconv.ParseBool(flags[f.alias])
 }
 
-func (cli *CLI) IntValue(flag, c string, flags map[string]string) int64 {
+func (cli *CLI) IntValue(flag, c string, flags map[string]string) (int64, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
 	if s, ok := flags[f.name]; ok {
-		i, _ := strconv.Atoi(s)
-		return int64(i)
+		i, err := strconv.Atoi(s)
+		return int64(i), err
 	}
-	i, _ := strconv.Atoi(flags[f.alias])
-	return int64(i)
+	i, err := strconv.Atoi(flags[f.alias])
+	return int64(i), err
 }
 
-func (cli *CLI) DoubleValue(flag, c string, flags map[string]string) float64 {
+func (cli *CLI) DoubleValue(flag, c string, flags map[string]string) (float64, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
 	if s, ok := flags[f.name]; ok {
-		d, _ := strconv.ParseFloat(s, 64)
-		return d
+		return strconv.ParseFloat(s, 64)
 	}
-	d, _ := strconv.ParseFloat(flags[f.alias], 64)
-	return d
+	return strconv.ParseFloat(flags[f.alias], 64)
 }
 
 func (cli *CLI) parse(cmd string) (string, map[string]string) {

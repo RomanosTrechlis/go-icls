@@ -13,10 +13,71 @@ import (
 func createCLI() *cli.CLI {
 	c := cli.New()
 	g := c.New("get", "get gets", "get gets", func(flags map[string]string) error {
+		if _, ok := flags["g"]; ok {
+			_, err := c.IntValue("g", "get", flags)
+			if err != nil {
+				return err
+			}
+		}
+		if _, ok := flags["int"]; ok {
+			_, err := c.IntValue("int", "get", flags)
+			if err != nil {
+				return err
+			}
+		}
+		_ = c.StringValue("f", "get", flags)
+		if _, ok := flags["f"]; ok {
+			_, err := c.FlagValue("get", "f", flags)
+			if err != nil {
+				return err
+			}
+		}
+		if _, ok := flags["string"]; ok {
+			_, err := c.FlagValue("get", "string", flags)
+			if err != nil {
+				return err
+			}
+		}
+		if _, ok := flags["b"]; ok {
+			_, err := c.BoolValue("b", "get", flags)
+			if err != nil {
+				return err
+			}
+		}
+		if _, ok := flags["bool"]; ok {
+			_, err := c.BoolValue("bool", "get", flags)
+			if err != nil {
+				return err
+			}
+		}
+		if _, ok := flags["l"]; ok {
+			_, err := c.DoubleValue("l", "get", flags)
+			if err != nil {
+				return err
+			}
+		}
+		if _, ok := flags["float"]; ok {
+			_, err := c.DoubleValue("float", "get", flags)
+			if err != nil {
+				return err
+			}
+		}
 		return nil
 	})
-	g.StringFlag("f", "", "", false)
-	g.IntFlag("g", "", "", false)
+	g.StringFlag("f", "string", "", false)
+	g.IntFlag("g", "int", "", false)
+	g.BoolFlag("b", "bool", "", false)
+	g.FloatFlag("l", "float", "", false)
+	g.StringFlag("r", "req", "", true)
+
+	c.HandlerFunc("put", func(flags map[string]string) error {
+		return nil
+	})
+
+	c.New("test", "test tests", "test tests", nil)
+	c.HandlerFunc("test", func(flags map[string]string) error {
+		return nil
+	})
 	return c
 }
 
@@ -28,11 +89,23 @@ func TestCLI_Execute(t *testing.T) {
 		err  bool
 	}{
 		{"quit", true, false},
-		{"get -f", false, false},
+		{"get -f -r t", false, false},
 		{"asdf", false, true},
 		{"get -h", false, false},
 		{"get --help", false, false},
 		{"--help", false, false},
+		{"get -g fail  -r t", false, true},
+		{"get -g 1  -r t", false, false},
+		{"get -b fail -r t", false, true},
+		{"get -b true -r t", false, false},
+		{"get -l 1.0 -r t", false, false},
+		{"get -l fail -r t", false, true},
+
+		{"get --int 1 -r t", false, false},
+		{"get --bool true -r t", false, false},
+		{"get --float 1.0 -r t", false, false},
+		{"get --string success -r t", false, false},
+		{"get --string success", false, true},
 	}
 	for _, tt := range test {
 		b, err := c.Execute(tt.line)

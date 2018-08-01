@@ -56,7 +56,7 @@ func TestConv(t *testing.T) {
 	}
 
 	for _, tt := range test {
-		i := conv(tt.value, tt.f)
+		i, _ := conv(tt.value, tt.f)
 		if reflect.TypeOf(i).String() != tt.out {
 			t.Errorf("expected '%s', got '%s'", tt.out, reflect.TypeOf(i).String())
 		}

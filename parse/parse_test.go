@@ -21,6 +21,7 @@ func TestParse(t *testing.T) {
 		{"del -d dir -f filename -e", "del", 3, 2},
 		{"rem -d dir -f filename -e --m This is one", "rem", 4, 3},
 		{"add -d dir -f filename -e -m \"This is one\"", "add", 4, 3},
+		{"-h", "", 1, 0},
 	}
 
 	for _, tt := range test {

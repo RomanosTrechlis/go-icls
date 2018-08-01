@@ -32,10 +32,6 @@ type command struct {
 
 // Flag add a new flag in the command struct
 func (c *command) Flag(name, alias, dataType, description string, isRequired bool) {
-	if c.flags == nil {
-		c.flags = make([]*flag, 0)
-	}
-
 	flag := &flag{
 		name:        name,
 		alias:       alias,
