@@ -17,13 +17,12 @@ func initializeCommand() *CLI {
 	return c
 }
 
-
 func TestDefaultValueToString(t *testing.T) {
 	var tests = []struct {
-		flagName string
+		flagName  string
 		expString string
-		dvType string
-	} {
+		dvType    string
+	}{
 		{"f", "", "string"},
 		{"g", "0", "int"},
 		{"b", "false", "bool"},
