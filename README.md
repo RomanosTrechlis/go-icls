@@ -1,4 +1,8 @@
 # go-icls
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/RomanosTrechlis/go-icls)](https://goreportcard.com/report/github.com/RomanosTrechlis/go-icls)
+
+
 go-icls is a small and simple library for creating cli applications.
 
 ## Overview

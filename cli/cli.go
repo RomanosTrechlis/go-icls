@@ -109,6 +109,7 @@ func (cli *CLI) HandlerFunc(commandName string, handler func(flags map[string]st
 	c.handler = handler
 }
 
+// FlagValue returns the value from the flag list.
 func (cli *CLI) FlagValue(command, flag string, flags map[string]string) (interface{}, error) {
 	cmd := cli.Command(command)
 	f := cmd.getFlag(flag)
@@ -116,6 +117,7 @@ func (cli *CLI) FlagValue(command, flag string, flags map[string]string) (interf
 	return conv(s, getDataTypeFunction(f.dataType))
 }
 
+// StringValue returns the string value from the flag list.
 func (cli *CLI) StringValue(flag, c string, flags map[string]string) string {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
@@ -123,6 +125,7 @@ func (cli *CLI) StringValue(flag, c string, flags map[string]string) string {
 	return s
 }
 
+// BoolValue returns the bool value from the flag list.
 func (cli *CLI) BoolValue(flag, c string, flags map[string]string) (bool, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
@@ -130,6 +133,7 @@ func (cli *CLI) BoolValue(flag, c string, flags map[string]string) (bool, error)
 	return strconv.ParseBool(s)
 }
 
+// IntValue returns the int value from the flag list.
 func (cli *CLI) IntValue(flag, c string, flags map[string]string) (int, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
@@ -138,6 +142,7 @@ func (cli *CLI) IntValue(flag, c string, flags map[string]string) (int, error) {
 	return i, err
 }
 
+// DoubleValue returns the float64 value from the flag list.
 func (cli *CLI) DoubleValue(flag, c string, flags map[string]string) (float64, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)

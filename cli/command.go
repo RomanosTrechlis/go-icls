@@ -6,8 +6,8 @@ package cli
 
 import (
 	"fmt"
-	"sort"
 	"reflect"
+	"sort"
 )
 
 // help checks if there are flags -h or --help and return true

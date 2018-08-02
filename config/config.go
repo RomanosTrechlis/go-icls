@@ -19,8 +19,6 @@ import (
 	"github.com/RomanosTrechlis/go-icls/internal/util"
 )
 
-type Section map[string]string
-
 // Configuration contains a map of sections with
 // the corresponding key-value pairs
 //
@@ -83,7 +81,7 @@ func GetConfigurationFromSingleFile(filename string) (*Configuration, error) {
 		return nil, fmt.Errorf("failed to read fileinfo for %s: %v", filename, err)
 	}
 	fss := filterPropertiesFiles(fs)
-	for _, _ = range fss {
+	for range fss {
 		err = c.readFile(filename)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read file %s: %v", filename, err)

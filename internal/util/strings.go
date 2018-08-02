@@ -4,6 +4,7 @@
 
 package util
 
+// Trim removes spaces in the beginning and the end of a string.
 func Trim(s string) string {
 	const space = ' '
 	n := len(s)

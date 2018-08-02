@@ -21,10 +21,10 @@ func TestValidateFlags(t *testing.T) {
 		ok          bool
 	}{
 		{"get", "f is empty string and must be not ok", map[string]string{"f": ""}, false},
-		{"get", "f is not empty and must be ok",map[string]string{"f": "file"}, true},
-		{"get", "there is no f and must be not ok",map[string]string{"g": "ggg"}, false},
-		{"get", "there is no f and must be not ok",map[string]string{"g": ""}, false},
-		{"get", "there is f and must be ok",map[string]string{"g": "", "f": "file"}, true},
+		{"get", "f is not empty and must be ok", map[string]string{"f": "file"}, true},
+		{"get", "there is no f and must be not ok", map[string]string{"g": "ggg"}, false},
+		{"get", "there is no f and must be not ok", map[string]string{"g": ""}, false},
+		{"get", "there is f and must be ok", map[string]string{"g": "", "f": "file"}, true},
 	}
 	for _, tt := range test {
 		_, ok := c.validateFlags(tt.name, tt.flags)
