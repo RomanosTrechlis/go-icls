@@ -1,5 +1,6 @@
 # go-icls
 
+[![Build Status](https://travis-ci.org/RomanosTrechlis/go-icls.svg?branch=master)](https://travis-ci.org/RomanosTrechlis/go-icls)
 [![Go Report Card](https://goreportcard.com/badge/github.com/RomanosTrechlis/go-icls)](https://goreportcard.com/report/github.com/RomanosTrechlis/go-icls)
 
 
