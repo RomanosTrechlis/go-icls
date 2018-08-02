@@ -1,3 +1,8 @@
-language: go 
+language: go
+
 go: 
   - "1.10"
+  - tip
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
