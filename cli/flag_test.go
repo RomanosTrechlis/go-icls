@@ -9,7 +9,7 @@ func initializeCommand() *CLI {
 	g := c.New("get", "get gets", "get gets", nil)
 	g.StringFlag("f", "string", "", "", false)
 	g.IntFlag("g", "int", 0, "", false)
-	g.BoolFlag("b", "bool", false, "", false)
+	g.BoolFlag("b", "bool", "", false)
 	g.FloatFlag("l", "float", 0.0, "", false)
 	g.StringFlag("r", "req", "", "", true)
 	g.Flag("u", "", "uint64", uint64(1), "", true)
