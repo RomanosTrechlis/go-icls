@@ -89,6 +89,15 @@ func main() {
 	put.StringFlag("f", "file", "", "filename to put", true)
 	put.IntFlag("g", "int", 1, "int to put", false)
 
+    // empty command with flags only
+	base := c.New("", "empty name", "empty name", func(flags map[string]string) error {
+		b, _ := c.BoolValue("v", "", flags)
+		if b {
+			fmt.Println("this is verbose")
+		}
+		return nil
+	})
+	base.BoolFlag("v", "verbose", "add prints", false)
 	c.Run()
 }
 ```
@@ -100,6 +109,10 @@ When executing the program:
     Usage:
     
             go-icls.exe <command> [options]
+    
+    Flags:
+            -v    --verbose
+                                    add prints
     
     Commands:
             get                   get gets
