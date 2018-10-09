@@ -22,6 +22,9 @@ type CLI struct {
 	closeChan chan struct{}
 }
 
+// cmd := cli.NewCommand()
+// cmd.NewCommand()
+
 // New creates a CLI struct.
 func New() *CLI {
 	return &CLI{
@@ -55,22 +58,29 @@ func (cli *CLI) Run() {
 
 // Execute parses a string and applies the f function. Returns true for exiting.
 func (cli *CLI) Execute(textCmd string) (bool, error) {
-	cmd, flags := cli.parse(textCmd)
-	if cmd == "quit" {
+	cmd, err := cli.parse2(textCmd)
+	if err != nil {
+		return false, fmt.Errorf("failed to parse command line: %v", err)
+	}
+	if cmd.Name == "quit" {
 		return true, nil
 	}
-	if cli.Command(cmd) == nil && !help(flags) {
+	cmdName, flags, handler, err := cli.getActualCommand(cmd, nil)
+	if err != nil {
+		return false, fmt.Errorf("failed to get flags and handler for command: %v", err)
+	}
+	if cli.Command(cmdName) == nil && !help(flags) {
 		return false, fmt.Errorf("failed to find command '%s'", cmd)
 	}
 	if help(flags) {
-		cli.printHelp(cmd, flags)
+		cli.printHelp(cmdName, flags)
 		return false, nil
 	}
-	flag, ok := cli.validateFlags(cmd, flags)
+	flag, ok := cli.validateFlags(cmdName, flags)
 	if !ok {
 		return false, fmt.Errorf("flag '%s' is required", flag)
 	}
-	handler := cli.Command(cmd).handler
+
 	if handler == nil {
 		return false, fmt.Errorf("there is no handler for the command '%s'", cmd)
 	}
@@ -173,6 +183,25 @@ func (cli *CLI) getValueFromFlag(flag *flag, flags map[string]string) string {
 func (cli *CLI) parse(cmd string) (string, map[string]string) {
 	cmd = util.Trim(cmd)
 	return parse.Parse(cmd)
+}
+
+func (cli *CLI) parse2(cmd string) (*parse.Command, error) {
+	cmd = util.Trim(cmd)
+	return parse.ParseLine(cmd)
+}
+
+func (cli *CLI) getActualCommand(pcmd *parse.Command, cmd *command) (string, map[string]string, func(map[string]string) error, error) {
+	if cmd == nil {
+		cmd = cli.Command(pcmd.Name)
+	}
+	if pcmd.Child == nil {
+		var handler func(map[string]string) error
+		if cmd != nil {
+			handler = cmd.handler
+		}
+		return pcmd.Name, pcmd.Flags, handler, nil
+	}
+	return cli.getActualCommand(pcmd.Child, cmd)
 }
 
 func (cli *CLI) quit() {

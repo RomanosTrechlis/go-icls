@@ -54,6 +54,47 @@ func TestGetCommand(t *testing.T) {
 	}
 }
 
+func TestParse2(t *testing.T) {
+	var test = []struct {
+		line string
+		cmd  *Command
+	}{
+		{"get -f filename",
+			&Command{"get", map[string]string{"f": "filename"}, nil,},
+		},
+		{"test", &Command{"test", map[string]string{}, nil}},
+		{"", nil},
+		{"get file -f filename",
+			&Command{"get", nil, &Command{"file",
+			map[string]string{"f": "filename"}, nil}},
+		},
+		{"-help", &Command{"", map[string]string{"help": ""}, nil},},
+	}
+
+	for _, tt := range test {
+		cmdTree, _ := ParseLine(tt.line)
+		if cmdTree.String() != tt.cmd.String() {
+			t.Errorf("expected '%s', got '%s'", tt.cmd.String(), cmdTree.String())
+		}
+	}
+}
+
+func TestCommand_String(t *testing.T) {
+	c := &Command{
+		Name: "first",
+		Flags: nil,
+		Child: &Command{
+			Name: "second",
+			Flags: map[string]string{"1": "one"},
+			Child: nil,
+		},
+	}
+	r := "{\"name\":\"first\",\"child\":{\"name\":\"second\",\"flags\":{\"1\":\"one\"}}}"
+	if c.String() != r {
+		t.Fatalf("failed to stringify command: expexted %s, got %s", r, c.String())
+	}
+}
+
 func BenchmarkParse(b *testing.B) {
 	s := "get -d dir -f filename"
 	for n := 0; n < b.N; n++ {

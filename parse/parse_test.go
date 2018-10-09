@@ -45,3 +45,39 @@ func TestParse(t *testing.T) {
 		}
 	}
 }
+
+func TestParse2(t *testing.T) {
+	var test = []struct {
+		cmd                 string
+		cmdName             string
+		numOfFlags          int
+		numOfNonEmptyValues int
+	}{
+		{"get -d dir -f filename", "get", 2, 2},
+		{"del -d dir -f filename -e", "del", 3, 2},
+		{"rem -d dir -f filename -e --m This is one", "rem", 4, 3},
+		{"add -d dir -f filename -e -m \"This is one\"", "add", 4, 3},
+		{"-h", "", 1, 0},
+	}
+
+	for _, tt := range test {
+		cmd, _ := parse.ParseLine(tt.cmd)
+		if cmd.Name != tt.cmdName {
+			t.Errorf("expected command name to be '%s', instead got '%s'", tt.cmdName, cmd.Name)
+		}
+		if len(cmd.Flags) != tt.numOfFlags {
+			t.Errorf("expected %d number of flags, instead got %d", tt.numOfFlags, len(cmd.Flags))
+		}
+
+		count := 0
+		for _, v := range cmd.Flags {
+			if v == "" {
+				continue
+			}
+			count++
+		}
+		if count != tt.numOfNonEmptyValues {
+			t.Errorf("expected %d number of non empty values, instead got %d", tt.numOfNonEmptyValues, count)
+		}
+	}
+}

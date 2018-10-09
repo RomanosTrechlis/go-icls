@@ -27,8 +27,22 @@ type command struct {
 	// flags is a map of flag objects that
 	// contain information on them
 	flags map[string]*flag
+	// commands are another command tree contained inside the command
+	commands  map[string]*command
 	// handler is the function executed when the command is called
 	handler func(flags map[string]string) error
+}
+
+func (c *command) New(name, shortDesc, description string, handler func(flags map[string]string) error) *command {
+	cmd := &command{
+		name:        name,
+		shortDesc:   shortDesc,
+		description: description,
+		flags:       make(map[string]*flag, 0),
+		handler:     handler,
+	}
+	c.commands[name] = cmd
+	return cmd
 }
 
 // Flag add a new flag in the command struct
@@ -49,6 +63,10 @@ func (c *command) Flag(name, alias, dataType string, defaultValue interface{}, d
 
 	c.flags[name] = flag
 	return nil
+}
+
+func (c *command) StringValue(name string) string {
+	return ""
 }
 
 // IntFlag adds an integer type value flag to command.
