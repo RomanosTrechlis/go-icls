@@ -56,11 +56,11 @@ func (cli *CLI) Run() {
 // Execute parses a string and applies the f function. Returns true for exiting.
 func (cli *CLI) Execute(textCmd string) (bool, error) {
 	cmd, flags := cli.parse(textCmd)
-	if cmd == "quit" {
+	if cmd == "quit" || cmd == "q" {
 		return true, nil
 	}
 	if cli.Command(cmd) == nil && !help(flags) {
-		return false, fmt.Errorf("failed to find command '%s'", cmd)
+		return false, nil
 	}
 	if help(flags) {
 		cli.printHelp(cmd, flags)

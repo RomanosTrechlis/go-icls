@@ -26,8 +26,15 @@ import (
 // command with flag value in quotation marks
 // add -d dir -f filename -e -m "This is one"
 //
+// help command prints the same as command -h
+// help add
+//
 func Parse(cmd string) (string, map[string]string) {
 	cmdName := getCommand(cmd)
+	if cmdName == "help" {
+		cmdName = getNextCommand(cmd, cmdName)
+		cmd = cmdName + " -h"
+	}
 	flags := getFlags(cmd)
 	return cmdName, flags
 }
@@ -77,4 +84,18 @@ func getCommand(cmd string) string {
 		return ""
 	}
 	return ss[0]
+}
+
+func getNextCommand(cmd, current string) string {
+	ss := strings.Split(cmd, " ")
+	if strings.HasPrefix(ss[0], "-") {
+		return ""
+	}
+	l := len(ss)
+	for i := 0; i < l; i++ {
+		if ss[i] == current && i + 1 < l{
+			return ss[i + 1]
+		}
+	}
+	return ""
 }
