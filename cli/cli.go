@@ -39,7 +39,9 @@ func (cli *CLI) Run() {
 		for scanner.Scan() {
 			exit, err := cli.Execute(scanner.Text())
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "command failed: %v\n", err)
+				if err.Error() != "" {
+					fmt.Fprintf(os.Stderr, "command failed: %v\n", err)
+				}
 				fmt.Fprintf(os.Stdout, "> ")
 				continue
 			}
@@ -55,20 +57,23 @@ func (cli *CLI) Run() {
 
 // Execute parses a string and applies the f function. Returns true for exiting.
 func (cli *CLI) Execute(textCmd string) (bool, error) {
+	if util.Trim(textCmd) == "" {
+		return false, nil
+	}
 	cmd, flags := cli.parse(textCmd)
 	if cmd == "quit" || cmd == "q" {
 		return true, nil
 	}
 	if cli.Command(cmd) == nil && !help(flags) {
-		return false, nil
+		return false, fmt.Errorf("failed to find command '%s'", cmd)
 	}
 	if help(flags) {
 		cli.printHelp(cmd, flags)
 		return false, nil
 	}
-	flag, ok := cli.validateFlags(cmd, flags)
-	if !ok {
-		return false, fmt.Errorf("flag '%s' is required", flag)
+	if _, ok := cli.validateFlags(cmd, flags); !ok {
+		cli.printHelp(cmd, flags)
+		return false, fmt.Errorf("")
 	}
 	handler := cli.Command(cmd).handler
 	if handler == nil {
