@@ -192,8 +192,22 @@ func (cli *CLI) String() string {
 	buf := new(bytes.Buffer)
 	w := tabwriter.NewWriter(buf, 1, 8, 8, ' ', tabwriter.TabIndent)
 	fmt.Fprintf(w, "Usage:\n\n\t%s <command> [options]\n\n", app)
+
+	// when there is an empty command prints the flags
+	empty := cli.Command("")
+	if empty != nil {
+		fmt.Fprintf(w, "Flags:\n")
+		for _, flag := range empty.flags {
+			fmt.Fprintf(w, "%s\n", flag)
+		}
+	}
+
 	fmt.Fprintf(w, "Commands:\n")
 	for k, v := range cli.commands {
+		// when it's an empty command skip the printing as a command
+		if k == "" {
+			continue
+		}
 		fmt.Fprintf(w, "\t%s\t%s\n", k, v.shortDesc)
 	}
 	fmt.Fprintf(w, "\nUse \"%s <command> -h\" for more information about a command.", app)
