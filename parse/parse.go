@@ -88,14 +88,19 @@ func getCommand(cmd string) string {
 
 func getNextCommand(cmd, current string) string {
 	ss := strings.Split(cmd, " ")
-	if strings.HasPrefix(ss[0], "-") {
-		return ""
-	}
 	l := len(ss)
 	for i := 0; i < l; i++ {
-		if ss[i] == current && i + 1 < l{
-			return ss[i + 1]
+		if ss[i] != current {
+			continue;
 		}
+		if i+1 >= l {
+			continue
+		}
+
+		if strings.HasPrefix(ss[i+1], "-") {
+			return ""
+		}
+		return ss[i+1]
 	}
 	return ""
 }
