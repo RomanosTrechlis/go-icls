@@ -95,6 +95,19 @@ func (cli *CLI) New(name, shortDesc, description string, handler func(flags map[
 	return cmd
 }
 
+// New creates a command
+func (cli *CLI) Simple(name, shortDesc, description string) *command {
+	cmd := &command{
+		name:        name,
+		shortDesc:   shortDesc,
+		description: description,
+		handler:     emptyHandler(),
+		flags:       make(map[string]*flag, 0),
+	}
+	cli.commands[name] = cmd
+	return cmd
+}
+
 // Command returns a command reference
 func (cli *CLI) Command(name string) *command {
 	cmd, ok := cli.commands[name]
@@ -233,4 +246,10 @@ func (cli *CLI) validateFlags(cmd string, flags map[string]string) (string, bool
 		}
 	}
 	return "", true
+}
+
+func emptyHandler() func(flags map[string]string) error {
+	return func(flags map[string]string) error {
+		return nil
+	}
 }

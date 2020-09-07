@@ -31,6 +31,10 @@ type command struct {
 	handler func(flags map[string]string) error
 }
 
+func (c *command) Handler(h func(flags map[string]string) error) {
+	c.handler = h
+}
+
 // Flag add a new flag in the command struct
 func (c *command) Flag(name, alias, dataType string, defaultValue interface{}, description string, isRequired bool) error {
 	if defaultValue != nil && reflect.TypeOf(defaultValue).String() != dataType {
