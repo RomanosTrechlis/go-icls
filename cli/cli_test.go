@@ -66,7 +66,7 @@ func createCLI() *cli.CLI {
 	})
 	g.StringFlag("f", "string", "", "", false)
 	g.IntFlag("g", "int", 0, "", false)
-	g.BoolFlag("b", "bool", "", false)
+	g.BoolFlag("b", "bool", "")
 	g.FloatFlag("l", "float", 0.0, "", false)
 	g.StringFlag("r", "req", "", "", true)
 

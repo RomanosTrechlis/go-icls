@@ -63,8 +63,8 @@ func (c *command) FloatFlag(name, alias string, defaultValue float64, descriptio
 }
 
 // BoolFlag adds a bool type value flag to command.
-func (c *command) BoolFlag(name, alias string, description string, isRequired bool) {
-	c.Flag(name, alias, "bool", false, description, isRequired)
+func (c *command) BoolFlag(name, alias string, description string) {
+	c.Flag(name, alias, "bool", false, description, false)
 }
 
 // StringFlag adds an String type value flag to command.

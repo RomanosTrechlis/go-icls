@@ -24,6 +24,58 @@ type CLI struct {
 
 type Flags map[string]string
 
+// BoolValue returns true if flag name or alias is passed as a flag in the executed command
+func BoolValue(flag, alias string, flags Flags) (bool, error) {
+	_, ok := flags[flag]
+	if ok {
+		return true, nil
+	}
+	_, ok = flags[alias]
+	if ok {
+		return true, nil
+	}
+	return false, fmt.Errorf("non existing flag: %s/%s", flag, alias)
+}
+
+// IntValue returns the integer value of a flag passed in the executed command
+func IntValue(flag, alias string, flags Flags) (int, error) {
+	v, ok := flags[flag]
+	if ok {
+		return strconv.Atoi(v)
+	}
+	v, ok = flags[alias]
+	if ok {
+		return strconv.Atoi(v)
+	}
+	return 0, fmt.Errorf("non existing flag: %s/%s", flag, alias)
+}
+
+// FloatValue returns the float value of a flag passed in the executed command
+func FloatValue(flag, alias string, flags Flags) (float64, error) {
+	v, ok := flags[flag]
+	if ok {
+		return strconv.ParseFloat(v, 64)
+	}
+	v, ok = flags[alias]
+	if ok {
+		return strconv.ParseFloat(v, 64)
+	}
+	return 0.0, fmt.Errorf("non existing flag: %s/%s", flag, alias)
+}
+
+// StringValue returns the string value of a flag passed in the executed command
+func StringValue(flag, alias string, flags Flags) (string, error) {
+	v, ok := flags[flag]
+	if ok {
+		return v, nil
+	}
+	v, ok = flags[alias]
+	if ok {
+		return v, nil
+	}
+	return "", fmt.Errorf("non existing flag: %s/%s", flag, alias)
+}
+
 // New creates a CLI struct.
 func New() *CLI {
 	return &CLI{

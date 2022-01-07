@@ -9,7 +9,7 @@ func initializeCommand() *CLI {
 	g := c.New("get", "get gets", "get gets", nil)
 	g.StringFlag("f", "string", "", "", false)
 	g.IntFlag("g", "int", 0, "", false)
-	g.BoolFlag("b", "bool", "", false)
+	g.BoolFlag("b", "bool", "")
 	g.FloatFlag("l", "float", 0.0, "", false)
 	g.StringFlag("r", "req", "", "", true)
 	g.Flag("u", "", "uint64", uint64(1), "", true)
@@ -39,5 +39,20 @@ func TestDefaultValueToString(t *testing.T) {
 		if out != tt.expString {
 			t.Errorf("Expected %s, got %s", tt.expString, out)
 		}
+	}
+}
+
+func TestBooleanFlags(t *testing.T) {
+	c := initializeCommand()
+	_, flags := c.parse("get -b")
+	b, err := BoolValue("b", "bool", flags)
+	if !b && err != nil {
+		t.Errorf("Expecting boolean flag to exist, instead got: %v", err)
+	}
+
+	_, flags = c.parse("get")
+	b, err = BoolValue("b", "bool", flags)
+	if err == nil || b {
+		t.Errorf("Expecting boolean flag to not exist, instead got: %v", b)
 	}
 }
