@@ -15,8 +15,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/RomanosTrechlis/go-icls/internal/util"
 )
 
 // Configuration contains a map of sections with
@@ -117,7 +115,7 @@ func (c *Configuration) readFile(name string) error {
 			continue
 		}
 		kv := strings.Split(line, "=")
-		c.setNewProperty(currentSectionName, util.Trim(kv[0]), util.Trim(kv[1]))
+		c.setNewProperty(currentSectionName, strings.Trim(kv[0], " "), strings.Trim(kv[1], " "))
 	}
 	return nil
 }

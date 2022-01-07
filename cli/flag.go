@@ -24,22 +24,20 @@ type flag struct {
 func (f *flag) defaultValueToString() string {
 	value := f.defaultValue
 	valueType := reflect.TypeOf(value).String()
-	if "string" == valueType {
+	switch valueType {
+	case "string":
 		return fmt.Sprintf("%s", value)
-	}
-	if "int" == valueType {
+	case "int":
 		return fmt.Sprintf("%d", value)
-	}
-	if "float32" == valueType {
+	case "float32":
 		return fmt.Sprintf("%f", value)
-	}
-	if "float64" == valueType {
+	case "float64":
 		return fmt.Sprintf("%f", value)
-	}
-	if "bool" == valueType {
+	case "bool":
 		return fmt.Sprintf("%t", value)
+	default:
+		return ""
 	}
-	return ""
 }
 
 func (f *flag) String() string {
@@ -53,12 +51,11 @@ func (f *flag) String() string {
 	if f.alias != "" {
 		alias = fmt.Sprintf("--%s", f.alias)
 	}
-	desc := fmt.Sprintf("%s", f.description)
 	if f.isRequired {
 		req = fmt.Sprintf("(required: %v)", f.isRequired)
 	}
-	fmt.Fprintf(w, "\t%s\t%s\n\t\t\t\t%s %s\n", name, alias, desc, req)
+	fmt.Fprintf(w, "\t%s\t%s\n\t\t\t\t%s %s\n", name, alias, f.description, req)
 	w.Flush()
 
-	return string(buf.Bytes())
+	return buf.String()
 }

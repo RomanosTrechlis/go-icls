@@ -11,11 +11,8 @@ import (
 )
 
 // help checks if there are flags -h or --help and return true
-func help(flags map[string]string) bool {
-	if checkForKeysInMap(flags, "h", "help") {
-		return true
-	}
-	return false
+func help(flags Flags) bool {
+	return checkForKeysInMap(flags, "h", "help")
 }
 
 // command is defined by the user and holds the all
@@ -28,10 +25,10 @@ type command struct {
 	// contain information on them
 	flags map[string]*flag
 	// handler is the function executed when the command is called
-	handler func(flags map[string]string) error
+	handler func(flags Flags) error
 }
 
-func (c *command) Handler(h func(flags map[string]string) error) {
+func (c *command) Handler(h func(flags Flags) error) {
 	c.handler = h
 }
 
@@ -85,9 +82,7 @@ func (c *command) getFlag(name string) *flag {
 }
 
 func (c *command) String() string {
-	n := fmt.Sprintf("usage: %s [%s flags]\n\n", c.name, c.name)
-	n += fmt.Sprintf("%s\n", c.description)
-	n += fmt.Sprintf("\nFlags: \n\n")
+	n := fmt.Sprintf("usage: %s [%s flags]\n\n%s\n\nFlags: \n\n", c.name, c.name, c.description)
 
 	if _, ok := c.flags["h"]; !ok {
 		c.flags["h"] = &flag{

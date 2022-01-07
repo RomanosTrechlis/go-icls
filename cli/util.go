@@ -9,37 +9,36 @@ import (
 )
 
 func getDataTypeFunction(dt string) func(string) (interface{}, error) {
-	if "int" == dt {
+	switch dt {
+	case "int":
 		return func(s string) (interface{}, error) {
 			i, err := strconv.Atoi(s)
 			return int64(i), err
 		}
-	}
-	if "bool" == dt {
+	case "string":
+		return func(s string) (interface{}, error) {
+			return s, nil
+		}
+	case "bool":
 		return func(s string) (interface{}, error) {
 			b, err := strconv.ParseBool(s)
 			return bool(b), err
 		}
-	}
-	if "float" == dt {
+	case "float":
 		return func(s string) (interface{}, error) {
 			f, err := strconv.ParseFloat(s, 64)
 			return float64(f), err
 		}
+	default:
+		return nil
 	}
-	if "string" == dt {
-		return func(s string) (interface{}, error) {
-			return s, nil
-		}
-	}
-	return nil
 }
 
 func conv(t string, f func(s string) (interface{}, error)) (interface{}, error) {
 	return f(t)
 }
 
-func checkForKeysInMap(m map[string]string, keys ...string) bool {
+func checkForKeysInMap(m Flags, keys ...string) bool {
 	for k := range m {
 		for _, key := range keys {
 			if k == key {

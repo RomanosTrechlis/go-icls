@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"text/tabwriter"
 
-	"github.com/RomanosTrechlis/go-icls/internal/util"
 	"github.com/RomanosTrechlis/go-icls/parse"
 )
 
@@ -22,10 +22,12 @@ type CLI struct {
 	closeChan chan struct{}
 }
 
+type Flags map[string]string
+
 // New creates a CLI struct.
 func New() *CLI {
 	return &CLI{
-		commands:  make(map[string]*command, 0),
+		commands:  make(map[string]*command),
 		closeChan: make(chan struct{}, 1),
 	}
 }
@@ -38,17 +40,15 @@ func (cli *CLI) Run() {
 		fmt.Fprintf(os.Stdout, "> ")
 		for scanner.Scan() {
 			exit, err := cli.Execute(scanner.Text())
-			if err != nil {
-				if err.Error() != "" {
-					fmt.Fprintf(os.Stderr, "command failed: %v\n", err)
-				}
-				fmt.Fprintf(os.Stdout, "> ")
-				continue
-			}
 			if exit {
 				cli.quit()
 				return
 			}
+
+			if err != nil && err.Error() != "" {
+				fmt.Fprintf(os.Stderr, "command failed: %v\n", err)
+			}
+
 			fmt.Fprintf(os.Stdout, "> ")
 		}
 	}()
@@ -57,10 +57,11 @@ func (cli *CLI) Run() {
 
 // Execute parses a string and applies the f function. Returns true for exiting.
 func (cli *CLI) Execute(textCmd string) (bool, error) {
-	if util.Trim(textCmd) == "" {
+	trimedCmd := strings.Trim(textCmd, " ")
+	if trimedCmd == "" {
 		return false, nil
 	}
-	cmd, flags := cli.parse(textCmd)
+	cmd, flags := cli.parse(trimedCmd)
 	if cmd == "quit" || cmd == "q" {
 		return true, nil
 	}
@@ -83,12 +84,12 @@ func (cli *CLI) Execute(textCmd string) (bool, error) {
 }
 
 // New creates a command
-func (cli *CLI) New(name, shortDesc, description string, handler func(flags map[string]string) error) *command {
+func (cli *CLI) New(name, shortDesc, description string, handler func(flags Flags) error) *command {
 	cmd := &command{
 		name:        name,
 		shortDesc:   shortDesc,
 		description: description,
-		flags:       make(map[string]*flag, 0),
+		flags:       make(map[string]*flag),
 		handler:     handler,
 	}
 	cli.commands[name] = cmd
@@ -102,7 +103,7 @@ func (cli *CLI) Simple(name, shortDesc, description string) *command {
 		shortDesc:   shortDesc,
 		description: description,
 		handler:     emptyHandler(),
-		flags:       make(map[string]*flag, 0),
+		flags:       make(map[string]*flag),
 	}
 	cli.commands[name] = cmd
 	return cmd
@@ -118,17 +119,17 @@ func (cli *CLI) Command(name string) *command {
 }
 
 // HandlerFunc adds a handler to the specific command
-func (cli *CLI) HandlerFunc(commandName string, handler func(flags map[string]string) error) {
+func (cli *CLI) HandlerFunc(commandName string, handler func(flags Flags) error) {
 	c := cli.Command(commandName)
 	if c == nil {
-		c = cli.New(commandName, "", "", handler)
+		cli.New(commandName, "", "", handler)
 		return
 	}
 	c.handler = handler
 }
 
 // FlagValue returns the value from the flag list.
-func (cli *CLI) FlagValue(command, flag string, flags map[string]string) (interface{}, error) {
+func (cli *CLI) FlagValue(command, flag string, flags Flags) (interface{}, error) {
 	cmd := cli.Command(command)
 	f := cmd.getFlag(flag)
 	s := cli.getValueFromFlag(f, flags)
@@ -136,7 +137,7 @@ func (cli *CLI) FlagValue(command, flag string, flags map[string]string) (interf
 }
 
 // StringValue returns the string value from the flag list.
-func (cli *CLI) StringValue(flag, c string, flags map[string]string) string {
+func (cli *CLI) StringValue(flag, c string, flags Flags) string {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
 	s := cli.getValueFromFlag(f, flags)
@@ -144,7 +145,7 @@ func (cli *CLI) StringValue(flag, c string, flags map[string]string) string {
 }
 
 // BoolValue returns the bool value from the flag list.
-func (cli *CLI) BoolValue(flag, c string, flags map[string]string) (bool, error) {
+func (cli *CLI) BoolValue(flag, c string, flags Flags) (bool, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
 	s := cli.getValueFromFlag(f, flags)
@@ -152,7 +153,7 @@ func (cli *CLI) BoolValue(flag, c string, flags map[string]string) (bool, error)
 }
 
 // IntValue returns the int value from the flag list.
-func (cli *CLI) IntValue(flag, c string, flags map[string]string) (int, error) {
+func (cli *CLI) IntValue(flag, c string, flags Flags) (int, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
 	s := cli.getValueFromFlag(f, flags)
@@ -161,7 +162,7 @@ func (cli *CLI) IntValue(flag, c string, flags map[string]string) (int, error) {
 }
 
 // DoubleValue returns the float64 value from the flag list.
-func (cli *CLI) DoubleValue(flag, c string, flags map[string]string) (float64, error) {
+func (cli *CLI) DoubleValue(flag, c string, flags Flags) (float64, error) {
 	cmd := cli.Command(c)
 	f := cmd.getFlag(flag)
 	if f == nil {
@@ -171,7 +172,7 @@ func (cli *CLI) DoubleValue(flag, c string, flags map[string]string) (float64, e
 	return strconv.ParseFloat(s, 64)
 }
 
-func (cli *CLI) getValueFromFlag(flag *flag, flags map[string]string) string {
+func (cli *CLI) getValueFromFlag(flag *flag, flags Flags) string {
 	if s, ok := flags[flag.name]; ok {
 		if flag.dataType == "bool" {
 			return "true"
@@ -188,8 +189,8 @@ func (cli *CLI) getValueFromFlag(flag *flag, flags map[string]string) string {
 	return flag.defaultValueToString()
 }
 
-func (cli *CLI) parse(cmd string) (string, map[string]string) {
-	cmd = util.Trim(cmd)
+func (cli *CLI) parse(cmd string) (string, Flags) {
+	cmd = strings.Trim(cmd, " ")
 	return parse.Parse(cmd)
 }
 
@@ -197,7 +198,7 @@ func (cli *CLI) quit() {
 	close(cli.closeChan)
 }
 
-func (cli *CLI) printHelp(cmd string, flags map[string]string) {
+func (cli *CLI) printHelp(cmd string, flags Flags) {
 	if cmd == "" {
 		fmt.Fprintf(os.Stdout, "%v\n", cli)
 		return
@@ -231,10 +232,10 @@ func (cli *CLI) String() string {
 	fmt.Fprintf(w, "\nUse \"%s <command> -h\" for more information about a command.", app)
 	w.Flush()
 
-	return string(buf.Bytes())
+	return buf.String()
 }
 
-func (cli *CLI) validateFlags(cmd string, flags map[string]string) (string, bool) {
+func (cli *CLI) validateFlags(cmd string, flags Flags) (string, bool) {
 	c := cli.Command(cmd)
 	for _, f := range c.flags {
 		if !f.isRequired {
@@ -248,8 +249,8 @@ func (cli *CLI) validateFlags(cmd string, flags map[string]string) (string, bool
 	return "", true
 }
 
-func emptyHandler() func(flags map[string]string) error {
-	return func(flags map[string]string) error {
+func emptyHandler() func(flags Flags) error {
+	return func(flags Flags) error {
 		return nil
 	}
 }
