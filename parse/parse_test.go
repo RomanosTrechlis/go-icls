@@ -21,9 +21,9 @@ func TestParse(t *testing.T) {
 		{"del -d dir -f filename -e", "del", 3, 2},
 		{"rem -d dir -f filename -e --m This is one", "rem", 4, 3},
 		{"add -d dir -f filename -e -m \"This is one\"", "add", 4, 3},
-		{"help", "", 1, 0}, // actual command is "-h"
+		{"help", "", 1, 0},        // actual command is "-h"
 		{"help get", "get", 1, 0}, // actual command is "get -h"
-		{"help -h", "", 1, 0}, // actual command is "-h"
+		{"help -h", "", 1, 0},     // actual command is "-h"
 		{"-h", "", 1, 0},
 	}
 

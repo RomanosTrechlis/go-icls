@@ -12,7 +12,7 @@ import (
 
 func createCLI() *cli.CLI {
 	c := cli.New()
-	g := c.New("get", "get gets", "get gets", func(flags map[string]string) error {
+	g := c.New("get", "get gets", "get gets", func(flags cli.Flags) error {
 		if _, ok := flags["g"]; ok {
 			_, err := c.IntValue("g", "get", flags)
 			if err != nil {
@@ -66,16 +66,16 @@ func createCLI() *cli.CLI {
 	})
 	g.StringFlag("f", "string", "", "", false)
 	g.IntFlag("g", "int", 0, "", false)
-	g.BoolFlag("b", "bool", "", false)
+	g.BoolFlag("b", "bool", "")
 	g.FloatFlag("l", "float", 0.0, "", false)
 	g.StringFlag("r", "req", "", "", true)
 
-	c.HandlerFunc("put", func(flags map[string]string) error {
+	c.HandlerFunc("put", func(flags cli.Flags) error {
 		return nil
 	})
 
 	c.New("test", "test tests", "test tests", nil)
-	c.HandlerFunc("test", func(flags map[string]string) error {
+	c.HandlerFunc("test", func(flags cli.Flags) error {
 		return nil
 	})
 
